@@ -1,0 +1,39 @@
+---
+title: ""
+author: Laraib Azmat
+date: June 06, 2024
+format: html
+---
+
+```{r library read in}
+library(tidyverse)
+library(readr)
+library(readxl)
+```
+
+```{r}
+edu_data <- read_csv("./data/EDU01a.csv")
+spec(edu_data)
+
+edu_edit <- edu_data |>
+  select(Area_name, STCOU, ends_with("D")) |>
+  print()|>
+  pivot_longer(cols = 3:12, 
+               values_to = "enlorment")
+edu_edit |>
+  mutate( year = case_when(
+    name == "EDU010187D" ~ 1987, 
+    name == "EDU010188D" ~ 1988, 
+    name == "EDU010189D" ~ 1989, 
+    name == "EDU010190D" ~ 1990, 
+    name == "EDU010191D" ~ 1991, 
+    name == "EDU010192D" ~ 1992, 
+    name == "EDU010193D" ~ 1993, 
+    name == "EDU010194D" ~ 1994, 
+    name == "EDU010195D" ~ 1995, 
+    name == "EDU010196D" ~ 1996
+  )) |>
+  mutate(measurement = ifelse(stringr::str_detect(edu_edit$name, "EDU0101"), "Public school enrolment", NA))
+```
+https://stackoverflow.com/questions/67304017/converting-dplyr-chain-to-function
+
