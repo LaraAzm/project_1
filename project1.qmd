@@ -132,9 +132,32 @@ steps_1_and_2 <- function(data, value = "enrollment"){
 
 testing the function
 ```{r}
-steps_1_and_2(data = edu_data_b, value = "test")
+after_step_2 <- steps_1_and_2(data = edu_data_b, value = "test")
+after_step_2
 ```
 
+Writing function for step 3:
+```{r}
+step_3 <- function(data){
+  
+edit <- data |>
+  #first we have to create a column corresponding to the last 2 digits
+   mutate(last_2_digits =  substr(name,8,9),
+  #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
+         year = ifelse(last_2_digits > 24, 
+                       paste("19",last_2_digits, sep = ""), 
+                       paste("20",last_2_digits, sep = "")),
+         measurement = substr(data$name, 1, 7)) |>
+  select(-last_2_digits)
+return(edit)
+}
+```
+
+testing function for step 3:
+```{r}
+after_step_3 <- step_3(data = after_step_2)
+after_step_3
+```
 
 
 
