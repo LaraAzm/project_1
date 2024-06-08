@@ -1,2 +1,2 @@
 # project_1
-Repository for project 1 with 
+Repository for project 1 
