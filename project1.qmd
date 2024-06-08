@@ -18,11 +18,14 @@ edu_data <- read_csv("./data/EDU01a.csv")
 #reading specs of table to get column names
 spec(edu_data)
 ```
+
 ```{r}
 #saving edits as a new object
 edu_edit <- edu_data |>
   #selecting only area_name, STCOU, and the columns that end with "D"
   select(Area_name, STCOU, ends_with("D")) |>
+  rename("area_name" = "Area_name")
+
   #printing to see the results 
   print()|>
   #converting to a long form and moving the results to an "enlorment" column
@@ -31,6 +34,7 @@ edu_edit <- edu_data |>
 #printing to see the results
 edu_edit
 ```
+
 ```{r}
 #overwriting the object to save edits
 edu_edit <- edu_edit |>
@@ -72,8 +76,6 @@ class(edu_county) <- c("county", class(edu_county))
 edu_county
 ```
 
-
-
 ```{r}
 #creating new data set with state level data
 edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$Area_name)))
@@ -97,3 +99,42 @@ edu_state <- edu_state |>
 #printing the data set
 edu_state
 ```
+
+
+
+
+Writing The Function:
+First, reading in the second data set:
+```{r}
+edu_data_b <- read_csv("./data/EDU01b.csv")
+
+#reading specs of table to get column names
+#spec(edu_data_b)
+```
+Write one function that does steps 1 & 2 above. Give an optional argument (that is it has a default value) that allows the user to specify the name of the column representing the value (enrollment for these data sets).
+```{r}
+steps_1_and_2 <- function(data, value = "enrollment"){
+
+# selecting the appropriate columns
+  selected_columns <- data |>
+       select(Area_name, STCOU, ends_with("D")) |>
+       rename("area_name" = "Area_name")
+  
+# pivoting the data, 'value' is defaulted to enrollment but can be changed
+  pivoted_data <- selected_columns |> 
+       pivot_longer(cols = 3:ncol(selected_columns), 
+               values_to = value)
+  
+# returning the data 
+  return(pivoted_data)
+}
+```
+
+testing the function
+```{r}
+steps_1_and_2(data = edu_data_b, value = "test")
+```
+
+
+
+
