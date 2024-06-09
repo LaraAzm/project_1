@@ -165,7 +165,7 @@ steps_1_and_2 <- function(data, value = "enrollment"){
 
 testing the function
 ```{r}
-after_step_2 <- steps_1_and_2(data = edu_data_b, value = "test")
+after_step_2 <- steps_1_and_2(data = edu_data_b, value = "enrollment")
 after_step_2
 ```
 
@@ -274,8 +274,26 @@ practice_step_6
 
 function step 4:
 ```{r}
-county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$Area_name))
-state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$Area_name)))
+
+step_4_5_6 <- function(data){
+  #first we need to take the data and split it into 
+  #two different data sets (county and state)
+  county <- subset(data, grepl(pattern = ", \\w\\w", data$area_name))
+  state <- subset(data, !(grepl(pattern = ", \\w\\w", data$area_name)))
+  # now we apply both functions
+  county_edit <- step_5(county)
+  state_edit <- step_6_division(state)
+  # return both data sets
+  return(list("County_Data" = county_edit, "State_Data" = state_edit))
+}
+```
+
+testing step 4, 5, 6 by using after step 3 data set
+```{r}
+final_data_practice <- step_4_5_6(after_step_3)
+attributes(final_data_practice)
+head(final_data_practice$County_Data)
+head(final_data_practice$State_Data)
 
 ```
 
