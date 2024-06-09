@@ -151,7 +151,7 @@ steps_1_and_2 <- function(data, value = "enrollment"){
 # selecting the appropriate columns
   selected_columns <- data |>
        select(Area_name, STCOU, ends_with("D")) |>
-       rename("area_name" = "Area_name")
+       rename("area_name" = "Area_name") 
   
 # pivoting the data, 'value' is defaulted to enrollment but can be changed
   pivoted_data <- selected_columns |> 
@@ -165,6 +165,7 @@ steps_1_and_2 <- function(data, value = "enrollment"){
 
 testing the function
 ```{r}
+# the "value = " tells r what to label the column that is being pivoted
 after_step_2 <- steps_1_and_2(data = edu_data_b, value = "enrollment")
 after_step_2
 ```
@@ -202,7 +203,7 @@ step_5 <- function(data){
   with_state <- data |>
   mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
   #adjusting columns to look better
-  select(area_name, state, STCOU, name, measurement, year, everything())  
+  select(area_name, state, STCOU, everything())  
   return(with_state)
 }
 ```
@@ -219,42 +220,44 @@ practice #works
 function step 6: (division)
 ```{r}
 step_6_division <- function(data){
-  division_data <- data |>
-#fixing division data to reflect error condition and  
+  title_case_data <- data |>
+    # first we mutate to str_to_title and render that:
+    mutate(area_name = str_to_title(area_name))
+
+# fixing division data to reflect error condition 
+  division_data <- title_case_data |>
     mutate(division = case_when(
       
-     str_to_title(area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
-                                    "New Hampshire", "Rhode Island", "Vermont") 
+     area_name %in% c("Connecticut", "Maine", "Massachusetts", 
+                      "New Hampshire", "Rhode Island", "Vermont") 
      ~ "New England",
      
-    str_to_title(area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
+    area_name %in% c("New Jersey", "New York", "Pennsylvania") 
     ~ "Middle Atlantic",
     
-    str_to_title(area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
-                                   "Wisconsin") 
+    area_name %in% c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin") 
     ~ "East North Central",
     
-    str_to_title(area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
-                                   "Nebraska", "North Dakota", "South Dakota") 
+    area_name %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", 
+                     "North Dakota", "South Dakota") 
     ~ "West North Central",
     
-    str_to_title(area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
-                                   "North Carolina", "South Carolina", "Virginia", 
-                                   "District of Columbia", "West Virginia")
+    area_name %in% c("Delaware", "Florida", "Georgia", "Maryland", 
+                     "North Carolina", "South Carolina", "Virginia", 
+                     "District of Columbia", "West Virginia")
     ~ "South Atlantic",
     
-    str_to_title(area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
+    area_name %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
     ~ "East South Central",
     
-    str_to_title(area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
+    area_name %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
     ~ "West South Central",
     
-    str_to_title(area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
-                                   "Nevada", "New Mexico", "Utah", "Wyoming")
+    area_name %in% c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", 
+                     "New Mexico", "Utah", "Wyoming")
     ~ "Mountain",
     
-    str_to_title(area_name) %in% c("Alaska", "California", "Hawaii", 
-                                   "Oregon", "Washington") 
+    area_name %in% c("Alaska", "California", "Hawaii", "Oregon", "Washington") 
     ~ "Pacific",
     
   TRUE ~ "ERROR")) |>
