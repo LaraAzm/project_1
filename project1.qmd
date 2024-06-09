@@ -320,4 +320,27 @@ testing wrapper function
 data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
 data_b_test # lets gooooooo
 ```
+applying the function to both data sets, resulting in two lists
+```{r}
+list_data_a <- my_wrapper(url = "./data/EDU01a.csv", default_var_name = "enrollment" )
+list_data_b <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "enrollment" )
+```
+creating a function that combines the data sets
+```{r}
+combine <- function(data1, data2){
+  # combine county data
+  county_combined <- bind_rows(data1$County_Data, data2$County_Data)
+  # combine state data
+  state_combined <- bind_rows(data1$State_Data, data2$State_Data)
+  # return list of combined data
+  return(list("Combined_County_Data" = county_combined, 
+              "Combined_State_Data" = state_combined))
+}
+```
+
+applying function to both lists of data sets
+```{r}
+final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data
+```
 
