@@ -299,4 +299,25 @@ head(final_data_practice$County_Data)
 head(final_data_practice$State_Data)
 
 ```
+writing wrapper function
+```{r}
+my_wrapper <- function(url, default_var_name = "enrollment"){
+# first we read in the csv
+  result <- read_csv(url) |>
+# then we apply steps 1 and 2
+    steps_1_and_2(value = default_var_name)|>
+# now we apply step 3
+    step_3() |>
+# finally steps 4,5,6 which returns a list of state and county data
+    step_4_5_6()
+return(result)
+}
+```
+
+testing wrapper function
+```{r}
+# to use this function you provide a url and the default variable name
+data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
+data_b_test # lets gooooooo
+```
 
