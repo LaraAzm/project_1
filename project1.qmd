@@ -26,9 +26,8 @@ edu_edit <- edu_data |>
   select(Area_name, STCOU, ends_with("D")) |>
   rename("area_name" = "Area_name")
 
-  #printing to see the results 
-  print()|>
   #converting to a long form and moving the results to an "enlorment" column
+edu_edit <- edu_edit |>
   pivot_longer(cols = 3:12, 
                values_to = "enlorment")
 #printing to see the results
@@ -60,14 +59,14 @@ edu_edit
 
 ```{r}
 #creating new data set with county level data 
-edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$Area_name))
+edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
 
 #overwriting the county object to save edits 
 edu_county <- edu_county |>
   #adding a new column to represent county's state
-  mutate(state = str_extract(edu_county$Area_name, " \\w\\w")) |>
+  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
   #adjusting columns to look better
-  select(Area_name, state, STCOU, name, measurement, year, everything())
+  select(area_name, state, STCOU, name, measurement, year, everything())
 
 #changing the class of the county data set
 class(edu_county) <- c("county", class(edu_county))
@@ -78,57 +77,57 @@ edu_county
 
 ```{r}
 #creating new data set with state level data
-edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$Area_name)))
+edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$area_name)))
 
 #adjusting area_name values to easily identify the region
-edu_state$Area_name <- str_to_title(edu_state$area_name)
+edu_state$area_name <- str_to_title(edu_state$area_name)
 
 #adding new column to reflect division of the state
-edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$Area_name])
+edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$area_name])
 
 #overwriting the state object to save edits 
 edu_state <- edu_state |>
 #fixing division data to reflect error condition and  
     mutate(division = case_when(
       
-     str_to_title(Area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
+     str_to_title(area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
                                     "New Hampshire", "Rhode Island", "Vermont") 
      ~ "New England",
      
-    str_to_title(Area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
+    str_to_title(area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
     ~ "Middle Atlantic",
     
-    str_to_title(Area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
+    str_to_title(area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
                                    "Wisconsin") 
     ~ "East North Central",
     
-    str_to_title(Area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
+    str_to_title(area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
                                    "Nebraska", "North Dakota", "South Dakota") 
     ~ "West North Central",
     
-    str_to_title(Area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
+    str_to_title(area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
                                    "North Carolina", "South Carolina", "Virginia", 
                                    "District of Columbia", "West Virginia")
     ~ "South Atlantic",
     
-    str_to_title(Area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
+    str_to_title(area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
     ~ "East South Central",
     
-    str_to_title(Area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
+    str_to_title(area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
     ~ "West South Central",
     
-    str_to_title(Area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
+    str_to_title(area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
                                    "Nevada", "New Mexico", "Utah", "Wyoming")
     ~ "Mountain",
     
-    str_to_title(Area_name) %in% c("Alaska", "California", "Hawaii", 
+    str_to_title(area_name) %in% c("Alaska", "California", "Hawaii", 
                                    "Oregon", "Washington") 
     ~ "Pacific",
     
-    is.na(division) ~ "ERROR",
+    is.na(division) ~ "ERROR"
       )) |>
   #adjusting columns to look better
-  select(Area_name, division, STCOU, everything())
+  select(area_name, division, STCOU, everything())
 
 #printing the data set
 edu_state
@@ -201,7 +200,7 @@ Writing function for step 5:
 
 step_5 <- function(data){
   with_state <- data |>
-  mutate(state = str_extract(edu_county$Area_name, " \\w\\w")) |>
+  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
   #adjusting columns to look better
   select(area_name, state, STCOU, name, measurement, year, everything())  
   return(with_state)
@@ -211,16 +210,70 @@ step_5 <- function(data){
 testing step 5:
 ```{r}
 #subsetting to work after step 4
-county_practice <- subset(after_step_3, grepl(pattern = ", \\w\\w", edu_edit$Area_name))
+county_practice <- subset(after_step_3, grepl(pattern = ", \\w\\w", after_step_3$area_name))
 
 practice <- step_5(county_practice)
 practice #works 
 ```
 
+function step 6: (division)
+```{r}
+step_6_division <- function(data){
+  division_data <- data |>
+#fixing division data to reflect error condition and  
+    mutate(division = case_when(
+      
+     str_to_title(area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
+                                    "New Hampshire", "Rhode Island", "Vermont") 
+     ~ "New England",
+     
+    str_to_title(area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
+    ~ "Middle Atlantic",
+    
+    str_to_title(area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
+                                   "Wisconsin") 
+    ~ "East North Central",
+    
+    str_to_title(area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
+                                   "Nebraska", "North Dakota", "South Dakota") 
+    ~ "West North Central",
+    
+    str_to_title(area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
+                                   "North Carolina", "South Carolina", "Virginia", 
+                                   "District of Columbia", "West Virginia")
+    ~ "South Atlantic",
+    
+    str_to_title(area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
+    ~ "East South Central",
+    
+    str_to_title(area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
+    ~ "West South Central",
+    
+    str_to_title(area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
+                                   "Nevada", "New Mexico", "Utah", "Wyoming")
+    ~ "Mountain",
+    
+    str_to_title(area_name) %in% c("Alaska", "California", "Hawaii", 
+                                   "Oregon", "Washington") 
+    ~ "Pacific",
+    
+  TRUE ~ "ERROR")) |>
+  #adjusting columns to look better
+  select(area_name, division, STCOU, everything())
+  return(division_data)
+}
+```
+
+testing function step 6:
+
+```{r}
+state <- subset(after_step_3, !(grepl(pattern = ", \\w\\w", after_step_3$area_name)))
+practice_step_6 <- step_6_division(state)
+practice_step_6
+```
 
 function step 4:
 ```{r}
-
 county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$Area_name))
 state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$Area_name)))
 
