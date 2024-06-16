@@ -350,19 +350,22 @@ final_combined_data
 
 ```{r}
 #writing a function to plot based on state divisions 
-plot.state <- function(data, var_name = "default_val"){
+plot.state <- function(data, var_name = "default_val_name"){
   
   #creating a temporary object to store edits 
   data_summary <- data |>
+    mutate(year = as.numeric(year)) |>
+    
+    #filtering out error values in division
+    filter(division != "ERROR", !is.na(var_name)) |>
     
     #grouing by division and year 
     group_by(division, year) |>
     
     #summarizing the enrollment means
-    summarise(enroll_mean = mean(get(var_name))) |>
+    summarise(enroll_mean = mean(get(var_name))) 
     
-    #filtering out error values in division
-    filter(division != "ERROR")
+    
   
   #plotting the data as a line graph
   data_summary |> 
@@ -375,5 +378,9 @@ plot.state <- function(data, var_name = "default_val"){
 plot.state(data = edu_state, var_name = "enrollment")
 
 
+```
+Testing on final data set
+```{r}
+plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
 ```
 
