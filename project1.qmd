@@ -393,13 +393,15 @@ Notice we aren’t plotting the means here, but the actual statistic’s value
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
                         x = "5", var_name = "default_var_name"){
-  if (interest == "top"){
+ # first create data set that has areas we are interested in
+   if (interest == "top"){
   summary <- data |>
   filter(state == state_name) |>
   group_by(area_name) |>
   summarise(enroll_mean = mean(get(var_name))) |>
   arrange(desc(enroll_mean)) |>
-  slice(1:x)
+  slice(1:x) |>
+  select(area_name)
   }
   else if(interest == "bottom"){
   summary <- data |>
@@ -407,15 +409,24 @@ plot.county <- function(data, state_name = "AL", interest = "top",
   group_by(area_name) |>
   summarise(enroll_mean = mean(get(var_name))) |>
   arrange(enroll_mean) |>
-  slice(1:x)
+  slice(1:x) |>
+  select(area_name)
   }
-  return(summary)
+# now combine this with original data set to plot values:
+  new <- semi_join(data, summary, by = "area_name")
+  ggplot(new |> mutate(year = as.numeric(year)), aes(x = year, y = get(var_name), colour = area_name)) + 
+    geom_line()
+  
 }
   
 ```
 
 testing
 ```{r}
-plot.county(state = "AL", data = final_combined_data$Combined_County_Data, var_name = "enrollment", interest = "top", x = 7)
+plot.county(state = "NC", 
+            data = final_combined_data$Combined_County_Data, 
+            var_name = "enrollment", 
+            interest = "bottom", 
+            x = 20)
 ```
 
