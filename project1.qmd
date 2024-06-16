@@ -10,7 +10,7 @@ library(tidyverse)
 library(readr)
 library(readxl)
 ```
-
+## Data read in for 1st component
 ```{r}
 #reading in data from data folder
 edu_data <- read_csv("./data/EDU01a.csv")
@@ -71,8 +71,6 @@ class(edu_county) <- c("county", class(edu_county))
 #printing the data set
 edu_county
 ```
-
-
 
 ```{r}
 #creating new data set with state level data
