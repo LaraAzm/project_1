@@ -1,6 +1,6 @@
 ---
 title: ""
-author: Laraib Azmat
+author: Laraib Azmat & Sam O'Ferrell
 date: June 06, 2024
 format: html
 ---
@@ -145,6 +145,7 @@ edu_data_b <- read_csv("./data/EDU01b.csv")
 #reading specs of table to get column names
 spec(edu_data_b)
 ```
+
 Write one function that does steps 1 & 2 above. Give an optional argument (that is it has a default value) that allows the user to specify the name of the column representing the value (enrollment for these data sets).
 ```{r}
 steps_1_and_2 <- function(data, value = "enrollment"){
@@ -348,21 +349,31 @@ final_combined_data
 ## Writing generic functions for summarinzing
 
 ```{r}
-edu_state_func <- edu_state |>
-  group_by(division, year) |>
-  summarise(enroll_mean = mean((enrollment))) |>
-  filter(division != "ERROR")
-edu_state_func
+#writing a function to plot based on state divisions 
+plot.state <- function(data, var_name = "default_val"){
+  
+  #creating a temporary object to store edits 
+  data_summary <- data |>
+    
+    #grouing by division and year 
+    group_by(division, year) |>
+    
+    #summarizing the enrollment means
+    summarise(enroll_mean = mean(get(var_name))) |>
+    
+    #filtering out error values in division
+    filter(division != "ERROR")
+  
+  #plotting the data as a line graph
+  data_summary |> 
+    
+    ggplot(data_summary |> aes(x = year, y = enroll_mean, colour = division)) + 
+    geom_line()
+}
 
+#testing the function 
+plot.state(data = edu_state, var_name = "enrollment")
 
-g <- ggplot(edu_state_func, aes(x = year, y = enroll_mean, division))
-g +  geom_col()
-
-
-
-```
-
-```{r}
 
 ```
 
