@@ -5,6 +5,7 @@ date: June 06, 2024
 format: html
 ---
 
+## Library read in
 ```{r library read in}
 library(tidyverse)
 library(readr)
@@ -26,10 +27,10 @@ edu_edit <- edu_data |>
   select(Area_name, STCOU, ends_with("D")) |>
   rename("area_name" = "Area_name")
 
-  #converting to a long form and moving the results to an "enlorment" column
+  #converting to a long form and moving the results to an "enrollment" column
 edu_edit <- edu_edit |>
   pivot_longer(cols = 3:12, 
-               values_to = "enlorment")
+               values_to = "enrollment")
 #printing to see the results
 edu_edit
 ```
@@ -134,7 +135,7 @@ edu_state
 ```
 
 
-
+## Repeating with generic functions 
 
 Writing The Function:
 First, reading in the second data set:
@@ -142,7 +143,7 @@ First, reading in the second data set:
 edu_data_b <- read_csv("./data/EDU01b.csv")
 
 #reading specs of table to get column names
-#spec(edu_data_b)
+spec(edu_data_b)
 ```
 Write one function that does steps 1 & 2 above. Give an optional argument (that is it has a default value) that allows the user to specify the name of the column representing the value (enrollment for these data sets).
 ```{r}
@@ -342,5 +343,26 @@ applying function to both lists of data sets
 ```{r}
 final_combined_data <- combine(list_data_a,list_data_b)
 final_combined_data
+```
+
+## Writing generic functions for summarinzing
+
+```{r}
+edu_state_func <- edu_state |>
+  group_by(division, year) |>
+  summarise(enroll_mean = mean((enrollment))) |>
+  filter(division != "ERROR")
+edu_state_func
+
+
+g <- ggplot(edu_state_func, aes(x = year, y = enroll_mean, division))
+g +  geom_col()
+
+
+
+```
+
+```{r}
+
 ```
 
