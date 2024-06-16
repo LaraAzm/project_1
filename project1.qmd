@@ -203,7 +203,7 @@ Writing function for step 5:
 
 step_5 <- function(data){
   with_state <- data |>
-  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
+  mutate(state = substr(area_name, nchar(area_name) - 1,nchar(area_name))) |>
   #adjusting columns to look better
   select(area_name, state, STCOU, everything())  
   return(with_state)
@@ -382,5 +382,58 @@ plot.state(data = edu_state, var_name = "enrollment")
 Testing on final data set
 ```{r}
 plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
+```
+county function
+specify the state of interest, giving a default value if not specified
+• determine whether the ‘top’ or ‘bottom’ most counties should be looked at with a default for ‘top’
+• instruct how many of the ‘top’ or ‘bottom’ will be investigated with a default value of 5
+Within your plot function you should:
+• filter the data to only include data from the state specified
+• find the overall mean of the statistic (use get(var_name) here as well) for each Area_name and sort
+those values from largest to smallest if ‘top’ is specified or smallest to largest if ‘bottom’ is specified
+• obtain the top or bottom x number of Area_names from the previous step where x is given by the user
+or the default
+• filter the data for this state to only include the Area_name’s from the previous part (this is the data
+we’ll use to plot)
+Notice we aren’t plotting the means here, but the actual statistic’s value
+```{r}
+plot.county <- function(data, state = "AL", interest = "top", 
+                        x = "5", var_name = "default_var_name"){
+  if (interest == "top"){
+  summary <- data |>
+  filter(state == state) |>
+  group_by(area_name) |>
+  summarise(enroll_mean = mean(get(var_name))) |>
+  arrange(enroll_mean) |>
+  slice(1:x)
+  }
+  else if(interest == "bottom"){
+  summary <- data |>
+  filter(state == state) |>
+  group_by(area_name) |>
+  summarise(enroll_mean = mean(get(var_name))) |>
+  arrange(desc(enroll_mean)) |>
+  slice(1:x)
+  }
+  return(summary)
+}
+  
+```
+
+testing
+```{r}
+plot.county(final_combined_data$Combined_County_Data, var_name = "enrollment")
+```
+
+```{r}
+test <- final_combined_data$Combined_County_Data 
+test2 <- test |>
+  filter(state == "AL") 
+ # group_by(area_name) |>
+ # summarise(enroll_mean = mean(enrollment, na.rm = TRUE)) 
+  #arrange(enroll_mean) |>
+ # slice(1:5) |>
+  #select(area_name, enroll_mean)
+test2
 ```
 
