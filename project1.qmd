@@ -18,19 +18,22 @@ edu_data <- read_csv("./data/EDU01a.csv")
 #reading specs of table to get column names
 spec(edu_data)
 ```
+
 ```{r}
 #saving edits as a new object
 edu_edit <- edu_data |>
   #selecting only area_name, STCOU, and the columns that end with "D"
   select(Area_name, STCOU, ends_with("D")) |>
-  #printing to see the results 
-  print()|>
+  rename("area_name" = "Area_name")
+
   #converting to a long form and moving the results to an "enlorment" column
+edu_edit <- edu_edit |>
   pivot_longer(cols = 3:12, 
                values_to = "enlorment")
 #printing to see the results
 edu_edit
 ```
+
 ```{r}
 #overwriting the object to save edits
 edu_edit <- edu_edit |>
@@ -56,14 +59,14 @@ edu_edit
 
 ```{r}
 #creating new data set with county level data 
-edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$Area_name))
+edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
 
 #overwriting the county object to save edits 
 edu_county <- edu_county |>
   #adding a new column to represent county's state
-  mutate(state = str_extract(edu_county$Area_name, " \\w\\w")) |>
+  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
   #adjusting columns to look better
-  select(Area_name, state, STCOU, name, measurement, year, everything())
+  select(area_name, state, STCOU, name, measurement, year, everything())
 
 #changing the class of the county data set
 class(edu_county) <- c("county", class(edu_county))
@@ -74,24 +77,270 @@ edu_county
 
 ```{r}
 #creating new data set with state level data
-edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$Area_name)))
+edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$area_name)))
 
 #adjusting area_name values to easily identify the region
-edu_state$Area_name <- str_to_title(edu_state$Area_name)
+edu_state$area_name <- str_to_title(edu_state$area_name)
 
 #adding new column to reflect division of the state
-edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$Area_name])
+edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$area_name])
 
 #overwriting the state object to save edits 
 edu_state <- edu_state |>
 #fixing division data to reflect error condition and  
     mutate(division = case_when(
-      Area_name == "District Of Columbia" ~ "South Atlantic", 
-      is.na(division) ~ "ERROR"
+      
+     str_to_title(area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
+                                    "New Hampshire", "Rhode Island", "Vermont") 
+     ~ "New England",
+     
+    str_to_title(area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
+    ~ "Middle Atlantic",
+    
+    str_to_title(area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
+                                   "Wisconsin") 
+    ~ "East North Central",
+    
+    str_to_title(area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
+                                   "Nebraska", "North Dakota", "South Dakota") 
+    ~ "West North Central",
+    
+    str_to_title(area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
+                                   "North Carolina", "South Carolina", "Virginia", 
+                                   "District of Columbia", "West Virginia")
+    ~ "South Atlantic",
+    
+    str_to_title(area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
+    ~ "East South Central",
+    
+    str_to_title(area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
+    ~ "West South Central",
+    
+    str_to_title(area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
+                                   "Nevada", "New Mexico", "Utah", "Wyoming")
+    ~ "Mountain",
+    
+    str_to_title(area_name) %in% c("Alaska", "California", "Hawaii", 
+                                   "Oregon", "Washington") 
+    ~ "Pacific",
+    
+    is.na(division) ~ "ERROR"
       )) |>
   #adjusting columns to look better
-  select(Area_name, division, STCOU, everything())
+  select(area_name, division, STCOU, everything())
 
 #printing the data set
 edu_state
 ```
+
+
+
+
+Writing The Function:
+First, reading in the second data set:
+```{r}
+edu_data_b <- read_csv("./data/EDU01b.csv")
+
+#reading specs of table to get column names
+#spec(edu_data_b)
+```
+Write one function that does steps 1 & 2 above. Give an optional argument (that is it has a default value) that allows the user to specify the name of the column representing the value (enrollment for these data sets).
+```{r}
+steps_1_and_2 <- function(data, value = "enrollment"){
+
+# selecting the appropriate columns
+  selected_columns <- data |>
+       select(Area_name, STCOU, ends_with("D")) |>
+       rename("area_name" = "Area_name") 
+  
+# pivoting the data, 'value' is defaulted to enrollment but can be changed
+  pivoted_data <- selected_columns |> 
+       pivot_longer(cols = 3:ncol(selected_columns), 
+               values_to = value)
+  
+# returning the data 
+  return(pivoted_data)
+}
+```
+
+testing the function
+```{r}
+# the "value = " tells r what to label the column that is being pivoted
+after_step_2 <- steps_1_and_2(data = edu_data_b, value = "enrollment")
+after_step_2
+```
+
+Writing function for step 3:
+```{r}
+step_3 <- function(data){
+  
+edit <- data |>
+  #first we have to create a column corresponding to the last 2 digits
+   mutate(last_2_digits =  substr(name,8,9),
+  #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
+         year = ifelse(last_2_digits > 24, 
+                       paste("19",last_2_digits, sep = ""), 
+                       paste("20",last_2_digits, sep = "")),
+         measurement = substr(data$name, 1, 7)) |>
+  select(-last_2_digits)
+return(edit)
+}
+```
+
+testing function for step 3:
+```{r}
+after_step_3 <- step_3(data = after_step_2)
+after_step_3
+```
+
+Writing function for step 5:
+"For the county level tibble, create a new variable that describes which state one of these county measurements corresponds to (the two digit abbreviation is fine, see substr()).
+
+```{r}
+#after already having the county data
+
+step_5 <- function(data){
+  with_state <- data |>
+  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
+  #adjusting columns to look better
+  select(area_name, state, STCOU, everything())  
+  return(with_state)
+}
+```
+
+testing step 5:
+```{r}
+#subsetting to work after step 4
+county_practice <- subset(after_step_3, grepl(pattern = ", \\w\\w", after_step_3$area_name))
+
+practice <- step_5(county_practice)
+practice #works 
+```
+
+function step 6: (division)
+```{r}
+step_6_division <- function(data){
+  title_case_data <- data |>
+    # first we mutate to str_to_title and render that:
+    mutate(area_name = str_to_title(area_name))
+
+# fixing division data to reflect error condition 
+  division_data <- title_case_data |>
+    mutate(division = case_when(
+      
+     area_name %in% c("Connecticut", "Maine", "Massachusetts", 
+                      "New Hampshire", "Rhode Island", "Vermont") 
+     ~ "New England",
+     
+    area_name %in% c("New Jersey", "New York", "Pennsylvania") 
+    ~ "Middle Atlantic",
+    
+    area_name %in% c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin") 
+    ~ "East North Central",
+    
+    area_name %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", 
+                     "North Dakota", "South Dakota") 
+    ~ "West North Central",
+    
+    area_name %in% c("Delaware", "Florida", "Georgia", "Maryland", 
+                     "North Carolina", "South Carolina", "Virginia", 
+                     "District of Columbia", "West Virginia")
+    ~ "South Atlantic",
+    
+    area_name %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
+    ~ "East South Central",
+    
+    area_name %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
+    ~ "West South Central",
+    
+    area_name %in% c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", 
+                     "New Mexico", "Utah", "Wyoming")
+    ~ "Mountain",
+    
+    area_name %in% c("Alaska", "California", "Hawaii", "Oregon", "Washington") 
+    ~ "Pacific",
+    
+  TRUE ~ "ERROR")) |>
+  #adjusting columns to look better
+  select(area_name, division, STCOU, everything())
+  return(division_data)
+}
+```
+
+testing function step 6:
+
+```{r}
+state <- subset(after_step_3, !(grepl(pattern = ", \\w\\w", after_step_3$area_name)))
+practice_step_6 <- step_6_division(state)
+practice_step_6
+```
+
+function step 4:
+```{r}
+
+step_4_5_6 <- function(data){
+  #first we need to take the data and split it into 
+  #two different data sets (county and state)
+  county <- subset(data, grepl(pattern = ", \\w\\w", data$area_name))
+  state <- subset(data, !(grepl(pattern = ", \\w\\w", data$area_name)))
+  # now we apply both functions
+  county_edit <- step_5(county)
+  state_edit <- step_6_division(state)
+  # return both data sets
+  return(list("County_Data" = county_edit, "State_Data" = state_edit))
+}
+```
+
+testing step 4, 5, 6 by using after step 3 data set
+```{r}
+final_data_practice <- step_4_5_6(after_step_3)
+attributes(final_data_practice)
+head(final_data_practice$County_Data)
+head(final_data_practice$State_Data)
+
+```
+writing wrapper function
+```{r}
+my_wrapper <- function(url, default_var_name = "enrollment"){
+# first we read in the csv
+  result <- read_csv(url) |>
+# then we apply steps 1 and 2
+    steps_1_and_2(value = default_var_name)|>
+# now we apply step 3
+    step_3() |>
+# finally steps 4,5,6 which returns a list of state and county data
+    step_4_5_6()
+return(result)
+}
+```
+
+testing wrapper function
+```{r}
+# to use this function you provide a url and the default variable name
+data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
+data_b_test # lets gooooooo
+```
+applying the function to both data sets, resulting in two lists
+```{r}
+list_data_a <- my_wrapper(url = "./data/EDU01a.csv", default_var_name = "enrollment" )
+list_data_b <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "enrollment" )
+```
+creating a function that combines the data sets
+```{r}
+combine <- function(data1, data2){
+  # combine county data
+  county_combined <- bind_rows(data1$County_Data, data2$County_Data)
+  # combine state data
+  state_combined <- bind_rows(data1$State_Data, data2$State_Data)
+  # return list of combined data
+  return(list("Combined_County_Data" = county_combined, 
+              "Combined_State_Data" = state_combined))
+}
+```
+
+applying function to both lists of data sets
+```{r}
+final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data
+```
+
