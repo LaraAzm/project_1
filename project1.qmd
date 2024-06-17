@@ -383,7 +383,9 @@ plot.state <- function(data, var_name = "enrollment"){
     #hiding the linetype legend
     guides(linetype = "none") +
     #changing the labels of x and y axis and the title
-    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "Division")
+    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "Division") +
+    #added to prevent scientific notion in the axis lables
+    scale_y_continuous(labels = label_comma())
 }
 
 #testing the function 
@@ -426,7 +428,9 @@ plot.county <- function(data, state_name = "AL", interest = "top",
     theme(legend.position="bottom") +
     geom_line(aes(linetype = area_name)) + 
     guides(linetype = "none") +
-    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "County")
+    labs(x = "Year", y = "Enrollment", title = "Enrollment changes over the years", colour = "County") +
+    #added to prevent scientific notion in the axis lables
+    scale_y_continuous(labels = label_comma())
   
 }
 ```
@@ -442,8 +446,7 @@ plot.county(state = "NC",
 
 ## Final Report 
 
-
-We will use our data processing function on two enrollment URLs:
+### Run our data processing function on two enrollment URLs:
 ```{r}
 list_data_a <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
@@ -453,22 +456,21 @@ list_data_b <- my_wrapper(
   default_var_name = "enrollment" )
 ```
 
-We will now run our data combining function to put these into one object (with two data frames):
-
+### Run our data combining function to put these into one object (with two data frames):
 ```{r}
 final_combined_data <- combine(list_data_a,list_data_b)
 final_combined_data
 ```
 
-We will now use the plot function on the state data frame
+### Use the plot function on the state data frame:
 ```{r}
 plot.state(data = final_combined_data$Combined_State_Data, 
            var_name = "enrollment")
 ```
 
 
-We will now use the plot function on the county data frame.
-- Specifying the state to be “NC”, the group being the top, the number looked at being 20
+### Use the plot function on the county data frame:
+  -   Specifying the state to be “NC”, the group being the top, the number looked at being 20
 ```{r}
 plot.county(state = "NC", 
             data = final_combined_data$Combined_County_Data, 
@@ -494,7 +496,8 @@ plot.county(state = "PA",
             interest = "top", 
             x = 8)
 ```
-Now we will read in four more data sets and apply our functions:
+
+### Reading similar data sets and applying our functions:
 ```{r}
 list_data_PST01a <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
