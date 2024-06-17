@@ -378,15 +378,16 @@ plot.state <- function(data, var_name = "default_val_name"){
   data_summary |> 
     
     ggplot(data_summary |> aes(x = year, y = enroll_mean, colour = division)) + 
+    #setting the plot as line with additional aesthetic to make the lines look different 
     geom_line(aes(linetype = division)) + 
+    #hiding the linetype legend
     guides(linetype = "none") +
+    #changing the labels of x and y axis and the title
     labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "Division")
 }
 
 #testing the function 
 plot.state(data = edu_state, var_name = "enrollment")
-
-
 ```
 
 ### Testing on final data set
@@ -428,7 +429,6 @@ plot.county <- function(data, state_name = "AL", interest = "top",
     labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "County")
   
 }
-  
 ```
 
 ### Testing the county plot function
