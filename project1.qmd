@@ -180,9 +180,9 @@ edit <- data |>
   #first we have to create a column corresponding to the last 2 digits
    mutate(last_2_digits =  substr(name,8,9),
   #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
-         year = ifelse(last_2_digits > 24, 
+         year = as.numeric(ifelse(last_2_digits > 24, 
                        paste("19",last_2_digits, sep = ""), 
-                       paste("20",last_2_digits, sep = "")),
+                       paste("20",last_2_digits, sep = ""))),
          measurement = substr(data$name, 1, 7)) |>
   select(-last_2_digits)
 return(edit)
@@ -350,7 +350,7 @@ final_combined_data
 
 ```{r}
 #writing a function to plot based on state divisions 
-plot.state <- function(data, var_name = "default_val_name"){
+plot.state <- function(data, var_name = "enrollment"){
   
   #creating a temporary object to store edits 
   data_summary <- data |>
@@ -383,16 +383,10 @@ Testing on final data set
 ```{r}
 plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
 ```
-county function
-Within your plot function you should:
-• filter the data to only include data from the state specified
-or the default
-• filter the data for this state to only include the Area_name’s from the previous part (this is the data
-we’ll use to plot)
-Notice we aren’t plotting the means here, but the actual statistic’s value
+
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
-                        x = "5", var_name = "default_var_name"){
+                        x = "5", var_name = "enrollment"){
  # first create data set that has areas we are interested in
    if (interest == "top"){
   summary <- data |>
@@ -426,7 +420,62 @@ testing
 plot.county(state = "NC", 
             data = final_combined_data$Combined_County_Data, 
             var_name = "enrollment", 
-            interest = "bottom", 
+            interest = "top", 
+            x = 15)
+```
+
+## Final Report
+
+
+We will use our data processing function on two enrollment URLs:
+```{r}
+list_data_a <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+  default_var_name = "enrollment" )
+list_data_b <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
+  default_var_name = "enrollment" )
+```
+
+We will now run our data combining function to put these into one object (with two data frames):
+
+```{r}
+final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data
+```
+
+We will now use the plot function on the state data frame
+```{r}
+plot.state(data = final_combined_data$Combined_State_Data, 
+           var_name = "enrollment")
+```
+
+
+We will now use the plot function on the county data frame.
+- Specifying the state to be “NC”, the group being the top, the number looked at being 20
+```{r}
+plot.county(state = "NC", 
+            data = final_combined_data$Combined_County_Data, 
+            interest = "top", 
             x = 20)
+```
+– Specifying the state to be “SC”, the group being the bottom, the number looked at being 7
+```{r}
+plot.county(state = "SC", 
+            data = final_combined_data$Combined_County_Data, 
+            interest = "bottom", 
+            x = 7)
+```
+– Once without specifying anything (defaults used)
+```{r}
+plot.county(data = final_combined_data$Combined_County_Data )
+```
+– Once specifying the state to be “PA”, the group being the top, the number looked at being 8
+```{r}
+plot.county(state = "PA", 
+            data = final_combined_data$Combined_County_Data, 
+            var_name = "enrollment", 
+            interest = "top", 
+            x = 8)
 ```
 
