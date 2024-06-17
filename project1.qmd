@@ -212,6 +212,8 @@ step_5 <- function(data){
   mutate(state = substr(area_name, nchar(area_name) - 1,nchar(area_name))) |>
   #adjusting columns to look better
   select(area_name, state, STCOU, everything())  
+  class(with_state) <- c("county", class(with_state))
+
   return(with_state)
 }
 ```
@@ -294,7 +296,7 @@ step_4_5_6 <- function(data){
   county_edit <- step_5(county)
   state_edit <- step_6_division(state)
   # return both data sets
-  return(list("County_Data" = county_edit, "State_Data" = state_edit))
+  return(list("county_data" = county_edit, "state_data" = state_edit))
 }
 ```
 
@@ -326,7 +328,7 @@ return(result)
 ```{r}
 # to use this function you provide a url and the default variable name
 data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
-data_b_test # lets gooooooo
+data_b_test
 ```
 
 ### Applying the function to both data sets, resulting in two lists
@@ -343,8 +345,8 @@ combine <- function(data1, data2){
   # combine state data
   state_combined <- bind_rows(data1$State_Data, data2$State_Data)
   # return list of combined data
-  return(list("County_Data" = county_combined, 
-              "State_Data" = state_combined))
+  return(list("county_data" = county_combined, 
+              "state_data" = state_combined))
 }
 ```
 
@@ -377,13 +379,18 @@ plot.state <- function(data, var_name = "enrollment"){
   #plotting the data as a line graph
   data_summary |> 
     
-    ggplot(data_summary |> aes(x = year, y = enroll_mean, colour = division)) + 
+    ggplot(data_summary |> aes(x = year, 
+                               y = enroll_mean, 
+                               colour = division)) + 
     #setting the plot as line with additional aesthetic to make the lines look different 
     geom_line(aes(linetype = division)) + 
     #hiding the linetype legend
     guides(linetype = "none") +
     #changing the labels of x and y axis and the title
-    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "Division") +
+    labs(x = "Year", 
+         y = "Enrollment mean", 
+         title = "Enrollment changes over the years", 
+         colour = "Division") +
     #added to prevent scientific notion in the axis lables
     scale_y_continuous(labels = label_comma())
 }
@@ -394,7 +401,7 @@ plot.state(data = edu_state, var_name = "enrollment")
 
 ### Testing on final data set
 ```{r}
-plot.state(final_combined_data$State_Data, var_name = "enrollment")
+plot.state(final_combined_data$state_data, var_name = "enrollment")
 ```
 
 ### County plot function with:
@@ -404,7 +411,7 @@ plot.state(final_combined_data$State_Data, var_name = "enrollment")
 plot.county <- function(data, state_name = "AL", interest = "top", 
                         x = "5", var_name = "enrollment"){
  # first create data set that has areas we are interested in
-   if (interest == "top"){
+  if (interest == "top"){
   summary <- data |>
   filter(state == state_name) |>
   group_by(area_name) |>
@@ -424,11 +431,17 @@ plot.county <- function(data, state_name = "AL", interest = "top",
   }
 # now combine this with original data set to plot values:
   new <- semi_join(data, summary, by = "area_name")
-  ggplot(new |> mutate(year = as.numeric(year)), aes(x = year, y = get(var_name), colour = area_name)) + 
+  ggplot(new |> mutate(year = as.numeric(year)), 
+         aes(x = year, 
+             y = get(var_name), 
+             colour = area_name)) + 
     theme(legend.position="bottom") +
     geom_line(aes(linetype = area_name)) + 
     guides(linetype = "none") +
-    labs(x = "Year", y = "Enrollment", title = "Enrollment changes over the years", colour = "County") +
+    labs(x = "Year", 
+         y = "Enrollment", 
+         title = "Enrollment changes over the years", 
+         colour = "County") +
     #added to prevent scientific notion in the axis lables
     scale_y_continuous(labels = label_comma())
   
@@ -438,7 +451,7 @@ plot.county <- function(data, state_name = "AL", interest = "top",
 ### Testing the county plot function
 ```{r}
 plot.county(state = "NC", 
-            data = final_combined_data$County_Data, 
+            data = final_combined_data$county_data, 
             var_name = "enrollment", 
             interest = "top", 
             x = 15)
@@ -464,7 +477,7 @@ final_combined_data
 
 ### Use the plot function on the state data frame:
 ```{r}
-plot.state(data = final_combined_data$State_Data, 
+plot.state(data = final_combined_data$state_data, 
            var_name = "enrollment")
 ```
 
@@ -473,25 +486,25 @@ plot.state(data = final_combined_data$State_Data,
   -   Specifying the state to be “NC”, the group being the top, the number looked at being 20
 ```{r}
 plot.county(state = "NC", 
-            data = final_combined_data$County_Data, 
+            data = final_combined_data$county_data, 
             interest = "top", 
             x = 20)
 ```
 – Specifying the state to be “SC”, the group being the bottom, the number looked at being 7
 ```{r}
 plot.county(state = "SC", 
-            data = final_combined_data$County_Data, 
+            data = final_combined_data$county_data, 
             interest = "bottom", 
             x = 7)
 ```
 – Once without specifying anything (defaults used)
 ```{r}
-plot.county(data = final_combined_data$County_Data )
+plot.county(data = final_combined_data$county_data )
 ```
 – Once specifying the state to be “PA”, the group being the top, the number looked at being 8
 ```{r}
 plot.county(state = "PA", 
-            data = final_combined_data$County_Data, 
+            data = final_combined_data$county_data, 
             var_name = "enrollment", 
             interest = "top", 
             x = 8)
@@ -499,37 +512,40 @@ plot.county(state = "PA",
 
 ### Reading similar data sets and applying our functions:
 ```{r}
-list_data_PST01a <- my_wrapper(
+list_data_pst01a <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
   default_var_name = "enrollment" )
-list_data_PST01b <- my_wrapper(
+
+list_data_pst01b <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", 
   default_var_name = "enrollment" )
-list_data_PST01c <- my_wrapper(
+
+list_data_pst01c <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", 
   default_var_name = "enrollment" )
-list_data_PST01d <- my_wrapper(
+
+list_data_pst01d <- my_wrapper(
   url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", 
   default_var_name = "enrollment" )
 ```
 
 ### Combine all 4 data sets:
 ```{r}
-pre_final_combined_data_ab <- combine(list_data_PST01a,list_data_PST01b)
-pre_final_combined_data_cd <- combine(list_data_PST01c,list_data_PST01d)
-final_combined_data_PST <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
+pre_final_combined_data_ab <- combine(list_data_pst01a,list_data_pst01b)
+pre_final_combined_data_cd <- combine(list_data_pst01c,list_data_pst01d)
+final_combined_data_pst <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
 ```
 
 ### Use the plot function on the state data frame:
 ```{r}
-plot.state(data = final_combined_data_PST$State_Data, 
+plot.state(data = final_combined_data_pst$state_data, 
            var_name = "enrollment")
 ```
 ### Use the plot function on the county data frame:
   -   Specifying the state to be “CA”, the group being the top, the number looked at being 15
 ```{r}
 plot.county(state = "CA", 
-            data = final_combined_data_PST$County_Data, 
+            data = final_combined_data_pst$county_data, 
             interest = "top", 
             x = 15)
 ```
@@ -537,18 +553,18 @@ plot.county(state = "CA",
 - Once specifying the state to be “TX”, the group being the top, the number looked at being 4
 ```{r}
 plot.county(state = "TX", 
-            data = final_combined_data_PST$County_Data, 
+            data = final_combined_data_pst$county_data, 
             interest = "top", 
             x = 4)
 ```
 – Once without specifying anything (defaults used)
 ```{r}
-plot.county(data = final_combined_data_PST$County_Data)
+plot.county(data = final_combined_data_pst$county_data)
 ```
 – Once specifying the state to be “NY”, the group being the top, the number looked at being 10
 ```{r}
 plot.county(state = "NY", 
-            data = final_combined_data_PST$County_Data, 
+            data = final_combined_data_pst$county_data, 
             interest = "top", 
             x = 10)
 ```
