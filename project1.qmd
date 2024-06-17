@@ -343,8 +343,8 @@ combine <- function(data1, data2){
   # combine state data
   state_combined <- bind_rows(data1$State_Data, data2$State_Data)
   # return list of combined data
-  return(list("Combined_County_Data" = county_combined, 
-              "Combined_State_Data" = state_combined))
+  return(list("County_Data" = county_combined, 
+              "State_Data" = state_combined))
 }
 ```
 
@@ -394,7 +394,7 @@ plot.state(data = edu_state, var_name = "enrollment")
 
 ### Testing on final data set
 ```{r}
-plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
+plot.state(final_combined_data$State_Data, var_name = "enrollment")
 ```
 
 ### County plot function with:
@@ -438,7 +438,7 @@ plot.county <- function(data, state_name = "AL", interest = "top",
 ### Testing the county plot function
 ```{r}
 plot.county(state = "NC", 
-            data = final_combined_data$Combined_County_Data, 
+            data = final_combined_data$County_Data, 
             var_name = "enrollment", 
             interest = "top", 
             x = 15)
@@ -464,7 +464,7 @@ final_combined_data
 
 ### Use the plot function on the state data frame:
 ```{r}
-plot.state(data = final_combined_data$Combined_State_Data, 
+plot.state(data = final_combined_data$State_Data, 
            var_name = "enrollment")
 ```
 
@@ -473,25 +473,25 @@ plot.state(data = final_combined_data$Combined_State_Data,
   -   Specifying the state to be “NC”, the group being the top, the number looked at being 20
 ```{r}
 plot.county(state = "NC", 
-            data = final_combined_data$Combined_County_Data, 
+            data = final_combined_data$County_Data, 
             interest = "top", 
             x = 20)
 ```
 – Specifying the state to be “SC”, the group being the bottom, the number looked at being 7
 ```{r}
 plot.county(state = "SC", 
-            data = final_combined_data$Combined_County_Data, 
+            data = final_combined_data$County_Data, 
             interest = "bottom", 
             x = 7)
 ```
 – Once without specifying anything (defaults used)
 ```{r}
-plot.county(data = final_combined_data$Combined_County_Data )
+plot.county(data = final_combined_data$County_Data )
 ```
 – Once specifying the state to be “PA”, the group being the top, the number looked at being 8
 ```{r}
 plot.county(state = "PA", 
-            data = final_combined_data$Combined_County_Data, 
+            data = final_combined_data$County_Data, 
             var_name = "enrollment", 
             interest = "top", 
             x = 8)
