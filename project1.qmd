@@ -387,7 +387,7 @@ plot.state <- function(data, var_name = "enrollment"){
                                y = enroll_mean, 
                                colour = division)) + 
     #setting the plot as line with additional aesthetic to make the lines look different 
-    geom_line(aes(linetype = division)) + 
+    geom_line(aes(linetype = division), lwd = .75) + 
     #hiding the linetype legend
     guides(linetype = "none") +
     #changing the labels of x and y axis and the title
@@ -440,7 +440,7 @@ plot.county <- function(data, state_name = "AL", interest = "top",
              y = get(var_name), 
              colour = area_name)) + 
     theme(legend.position="bottom") +
-    geom_line(aes(linetype = area_name)) + 
+    geom_line(aes(linetype = area_name), lwd = .65) + 
     guides(linetype = "none") +
     labs(x = "Year", 
          y = "Enrollment", 
@@ -545,6 +545,7 @@ final_combined_data_pst <- combine(pre_final_combined_data_ab,pre_final_combined
 plot.state(data = final_combined_data_pst$state_data, 
            var_name = "enrollment")
 ```
+
 ### Use the plot function on the county data frame:
   -   Specifying the state to be “CA”, the group being the top, the number looked at being 15
 ```{r}
@@ -561,10 +562,12 @@ plot.county(state = "TX",
             interest = "top", 
             x = 4)
 ```
+
 – Once without specifying anything (defaults used)
 ```{r}
 plot.county(data = final_combined_data_pst$county_data)
 ```
+
 – Once specifying the state to be “NY”, the group being the top, the number looked at being 10
 ```{r}
 plot.county(state = "NY", 
