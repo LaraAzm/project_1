@@ -360,6 +360,7 @@ final_combined_data
 
 ### Plotting state data with enrollment mean and divison on y-axis and year on x-axis 
 ```{r}
+library(scales)
 #writing a function to plot based on state divisions 
 plot.state <- function(data, var_name = "enrollment"){
   
