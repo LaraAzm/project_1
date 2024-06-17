@@ -513,8 +513,7 @@ list_data_PST01d <- my_wrapper(
   default_var_name = "enrollment" )
 ```
 
-Combined all 4 data sets:
-
+### Combine all 4 data sets:
 ```{r}
 pre_final_combined_data_ab <- combine(list_data_PST01a,list_data_PST01b)
 pre_final_combined_data_cd <- combine(list_data_PST01c,list_data_PST01d)
