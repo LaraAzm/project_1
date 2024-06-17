@@ -346,7 +346,7 @@ final_combined_data <- combine(list_data_a,list_data_b)
 final_combined_data
 ```
 
-## Writing generic functions for summarinzing
+## Writing generic functions for ploting the summary
 
 ```{r}
 #writing a function to plot based on state divisions 
@@ -364,14 +364,14 @@ plot.state <- function(data, var_name = "enrollment"){
     
     #summarizing the enrollment means
     summarise(enroll_mean = mean(get(var_name))) 
-    
-    
   
   #plotting the data as a line graph
   data_summary |> 
     
     ggplot(data_summary |> aes(x = year, y = enroll_mean, colour = division)) + 
-    geom_line()
+    geom_line(aes(linetype = division)) + 
+    guides(linetype = "none") +
+    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "Division")
 }
 
 #testing the function 
@@ -379,11 +379,22 @@ plot.state(data = edu_state, var_name = "enrollment")
 
 
 ```
+
 Testing on final data set
 ```{r}
 plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
 ```
 
+<<<<<<< HEAD
+=======
+county function
+Within your plot function you should:
+• filter the data to only include data from the state specified
+or the default
+• filter the data for this state to only include the Area_name’s from the previous part (this is the data
+we’ll use to plot)
+Notice we aren’t plotting the means here, but the actual statistic’s value
+>>>>>>> ede4e08b834e488c0e916d642850df3d6a5400f1
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
                         x = "5", var_name = "enrollment"){
@@ -409,7 +420,10 @@ plot.county <- function(data, state_name = "AL", interest = "top",
 # now combine this with original data set to plot values:
   new <- semi_join(data, summary, by = "area_name")
   ggplot(new |> mutate(year = as.numeric(year)), aes(x = year, y = get(var_name), colour = area_name)) + 
-    geom_line()
+    theme(legend.position="bottom") +
+    geom_line(aes(linetype = area_name)) + 
+    guides(linetype = "none") +
+    labs(x = "Year", y = "Enrollment mean", title = "Enrollment changes over the years", colour = "County")
   
 }
   
