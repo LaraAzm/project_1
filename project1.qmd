@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Project 1: Data combination and summarization through functions"
 author: Laraib Azmat & Sam O'Ferrell
 date: June 06, 2024
 format: html
@@ -11,7 +11,10 @@ library(tidyverse)
 library(readr)
 library(readxl)
 ```
-## Data read in for 1st component
+
+## Data processing
+
+### Step 1: Read in the data
 ```{r}
 #reading in data from data folder
 edu_data <- read_csv("./data/EDU01a.csv")
@@ -20,13 +23,17 @@ edu_data <- read_csv("./data/EDU01a.csv")
 spec(edu_data)
 ```
 
+### Step 2: Select only the Area_name (rename as area_name), STCOU and any columns that ends in “D”
 ```{r}
 #saving edits as a new object
 edu_edit <- edu_data |>
   #selecting only area_name, STCOU, and the columns that end with "D"
   select(Area_name, STCOU, ends_with("D")) |>
   rename("area_name" = "Area_name")
+```
 
+### Step 3: Converting to a long form 
+```{r}
   #converting to a long form and moving the results to an "enrollment" column
 edu_edit <- edu_edit |>
   pivot_longer(cols = 3:12, 
@@ -35,6 +42,7 @@ edu_edit <- edu_edit |>
 edu_edit
 ```
 
+### Step 4: Converting year to numeric data and adding a column to represent measurement 
 ```{r}
 #overwriting the object to save edits
 edu_edit <- edu_edit |>
@@ -58,6 +66,7 @@ edu_edit <- edu_edit |>
 edu_edit
 ```
 
+### Step 5: Creating a county data set with state variable 
 ```{r}
 #creating new data set with county level data 
 edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
@@ -76,6 +85,7 @@ class(edu_county) <- c("county", class(edu_county))
 edu_county
 ```
 
+### Step 6: Creating a state data set with division variable 
 ```{r}
 #creating new data set with state level data
 edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$area_name)))
@@ -134,11 +144,9 @@ edu_state <- edu_state |>
 edu_state
 ```
 
-
 ## Repeating with generic functions 
 
-Writing The Function:
-First, reading in the second data set:
+### Reading in the second data set:
 ```{r}
 edu_data_b <- read_csv("./data/EDU01b.csv")
 
@@ -146,7 +154,7 @@ edu_data_b <- read_csv("./data/EDU01b.csv")
 spec(edu_data_b)
 ```
 
-Write one function that does steps 1 & 2 above. Give an optional argument (that is it has a default value) that allows the user to specify the name of the column representing the value (enrollment for these data sets).
+### Repeating step 1 & 2 with option to specify name of value column 
 ```{r}
 steps_1_and_2 <- function(data, value = "enrollment"){
 
@@ -165,14 +173,14 @@ steps_1_and_2 <- function(data, value = "enrollment"){
 }
 ```
 
-testing the function
+### Testing the function
 ```{r}
 # the "value = " tells r what to label the column that is being pivoted
 after_step_2 <- steps_1_and_2(data = edu_data_b, value = "enrollment")
 after_step_2
 ```
 
-Writing function for step 3:
+### Writing function for step 3:
 ```{r}
 step_3 <- function(data){
   
@@ -189,15 +197,13 @@ return(edit)
 }
 ```
 
-testing function for step 3:
+### Testing function for step 3:
 ```{r}
 after_step_3 <- step_3(data = after_step_2)
 after_step_3
 ```
 
-Writing function for step 5:
-"For the county level tibble, create a new variable that describes which state one of these county measurements corresponds to (the two digit abbreviation is fine, see substr()).
-
+### Writing function for step 5:
 ```{r}
 #after already having the county data
 
@@ -210,7 +216,7 @@ step_5 <- function(data){
 }
 ```
 
-testing step 5:
+### Testing step 5:
 ```{r}
 #subsetting to work after step 4
 county_practice <- subset(after_step_3, grepl(pattern = ", \\w\\w", after_step_3$area_name))
@@ -219,7 +225,7 @@ practice <- step_5(county_practice)
 practice #works 
 ```
 
-function step 6: (division)
+### Step 6 function (division):
 ```{r}
 step_6_division <- function(data){
   title_case_data <- data |>
@@ -269,15 +275,14 @@ step_6_division <- function(data){
 }
 ```
 
-testing function step 6:
-
+### Testing function step 6:
 ```{r}
 state <- subset(after_step_3, !(grepl(pattern = ", \\w\\w", after_step_3$area_name)))
 practice_step_6 <- step_6_division(state)
 practice_step_6
 ```
 
-function step 4:
+### Step 4 function: 
 ```{r}
 
 step_4_5_6 <- function(data){
@@ -293,7 +298,7 @@ step_4_5_6 <- function(data){
 }
 ```
 
-testing step 4, 5, 6 by using after step 3 data set
+### Testing step 4, 5, 6 by using after step 3:
 ```{r}
 final_data_practice <- step_4_5_6(after_step_3)
 attributes(final_data_practice)
@@ -301,7 +306,8 @@ head(final_data_practice$County_Data)
 head(final_data_practice$State_Data)
 
 ```
-writing wrapper function
+
+### Writing wrapper function
 ```{r}
 my_wrapper <- function(url, default_var_name = "enrollment"){
 # first we read in the csv
@@ -316,18 +322,20 @@ return(result)
 }
 ```
 
-testing wrapper function
+### Testing wrapper function
 ```{r}
 # to use this function you provide a url and the default variable name
 data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
 data_b_test # lets gooooooo
 ```
-applying the function to both data sets, resulting in two lists
+
+### Applying the function to both data sets, resulting in two lists
 ```{r}
 list_data_a <- my_wrapper(url = "./data/EDU01a.csv", default_var_name = "enrollment" )
 list_data_b <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "enrollment" )
 ```
-creating a function that combines the data sets
+
+### Creating a function that combines the data sets
 ```{r}
 combine <- function(data1, data2){
   # combine county data
@@ -346,8 +354,9 @@ final_combined_data <- combine(list_data_a,list_data_b)
 final_combined_data
 ```
 
-## Writing generic functions for ploting the summary
+## Writing generic functions for plotting the summary
 
+### Plotting state data with enrollment mean and divison on y-axis and year on x-axis 
 ```{r}
 #writing a function to plot based on state divisions 
 plot.state <- function(data, var_name = "default_val_name"){
@@ -380,18 +389,14 @@ plot.state(data = edu_state, var_name = "enrollment")
 
 ```
 
-Testing on final data set
+### Testing on final data set
 ```{r}
 plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
 ```
 
-county function
-Within your plot function you should:
-• filter the data to only include data from the state specified
-or the default
-• filter the data for this state to only include the Area_name’s from the previous part (this is the data
-we’ll use to plot)
-Notice we aren’t plotting the means here, but the actual statistic’s value
+### County plot function with:
+  -   data from the state specified or the default
+  -   only the Area_names from the previous part
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
                         x = "5", var_name = "default_var_name"){
@@ -426,7 +431,7 @@ plot.county <- function(data, state_name = "AL", interest = "top",
   
 ```
 
-testing
+### Testing the county plot function
 ```{r}
 plot.county(state = "NC", 
             data = final_combined_data$Combined_County_Data, 
