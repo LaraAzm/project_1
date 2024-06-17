@@ -334,8 +334,11 @@ data_b_test
 
 ### Applying the function to both data sets, resulting in two lists
 ```{r}
-list_data_a <- my_wrapper(url = "./data/EDU01a.csv", default_var_name = "enrollment" )
-list_data_b <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "enrollment" )
+list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",
+                          default_var_name = "enrollment" )
+
+list_data_b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv",
+                          default_var_name = "enrollment" )
 ```
 
 ### Creating a function that combines the data sets
