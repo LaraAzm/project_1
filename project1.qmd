@@ -385,8 +385,6 @@ Testing on final data set
 plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
 ```
 
-<<<<<<< HEAD
-=======
 county function
 Within your plot function you should:
 • filter the data to only include data from the state specified
@@ -394,7 +392,6 @@ or the default
 • filter the data for this state to only include the Area_name’s from the previous part (this is the data
 we’ll use to plot)
 Notice we aren’t plotting the means here, but the actual statistic’s value
->>>>>>> ede4e08b834e488c0e916d642850df3d6a5400f1
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
                         x = "5", var_name = "enrollment"){
@@ -438,7 +435,7 @@ plot.county(state = "NC",
             x = 15)
 ```
 
-## Final Report
+## Final Report 
 
 
 We will use our data processing function on two enrollment URLs:
