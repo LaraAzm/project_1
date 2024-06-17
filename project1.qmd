@@ -520,3 +520,37 @@ pre_final_combined_data_cd <- combine(list_data_PST01c,list_data_PST01d)
 final_combined_data_PST <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
 ```
 
+### Use the plot function on the state data frame:
+```{r}
+plot.state(data = final_combined_data_PST$State_Data, 
+           var_name = "enrollment")
+```
+### Use the plot function on the county data frame:
+  -   Specifying the state to be “CA”, the group being the top, the number looked at being 15
+```{r}
+plot.county(state = "CA", 
+            data = final_combined_data_PST$County_Data, 
+            interest = "top", 
+            x = 15)
+```
+
+- Once specifying the state to be “TX”, the group being the top, the number looked at being 4
+```{r}
+plot.county(state = "TX", 
+            data = final_combined_data_PST$County_Data, 
+            interest = "top", 
+            x = 4)
+```
+– Once without specifying anything (defaults used)
+```{r}
+plot.county(data = final_combined_data_PST$County_Data)
+```
+– Once specifying the state to be “NY”, the group being the top, the number looked at being 10
+```{r}
+plot.county(state = "NY", 
+            data = final_combined_data_PST$County_Data, 
+            interest = "top", 
+            x = 10)
+```
+
+
