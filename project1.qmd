@@ -188,9 +188,9 @@ edit <- data |>
   #first we have to create a column corresponding to the last 2 digits
    mutate(last_2_digits =  substr(name,8,9),
   #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
-         year = ifelse(last_2_digits > 24, 
+         year = as.numeric(ifelse(last_2_digits > 24, 
                        paste("19",last_2_digits, sep = ""), 
-                       paste("20",last_2_digits, sep = "")),
+                       paste("20",last_2_digits, sep = ""))),
          measurement = substr(data$name, 1, 7)) |>
   select(-last_2_digits)
 return(edit)
@@ -359,7 +359,7 @@ final_combined_data
 ### Plotting state data with enrollment mean and divison on y-axis and year on x-axis 
 ```{r}
 #writing a function to plot based on state divisions 
-plot.state <- function(data, var_name = "default_val_name"){
+plot.state <- function(data, var_name = "enrollment"){
   
   #creating a temporary object to store edits 
   data_summary <- data |>
@@ -400,7 +400,7 @@ plot.state(final_combined_data$Combined_State_Data, var_name = "enrollment")
   -   only the Area_names from the previous part
 ```{r}
 plot.county <- function(data, state_name = "AL", interest = "top", 
-                        x = "5", var_name = "default_var_name"){
+                        x = "5", var_name = "enrollment"){
  # first create data set that has areas we are interested in
    if (interest == "top"){
   summary <- data |>
@@ -436,7 +436,85 @@ plot.county <- function(data, state_name = "AL", interest = "top",
 plot.county(state = "NC", 
             data = final_combined_data$Combined_County_Data, 
             var_name = "enrollment", 
-            interest = "bottom", 
+            interest = "top", 
+            x = 15)
+```
+
+## Final Report 
+
+
+We will use our data processing function on two enrollment URLs:
+```{r}
+list_data_a <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+  default_var_name = "enrollment" )
+list_data_b <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
+  default_var_name = "enrollment" )
+```
+
+We will now run our data combining function to put these into one object (with two data frames):
+
+```{r}
+final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data
+```
+
+We will now use the plot function on the state data frame
+```{r}
+plot.state(data = final_combined_data$Combined_State_Data, 
+           var_name = "enrollment")
+```
+
+
+We will now use the plot function on the county data frame.
+- Specifying the state to be “NC”, the group being the top, the number looked at being 20
+```{r}
+plot.county(state = "NC", 
+            data = final_combined_data$Combined_County_Data, 
+            interest = "top", 
             x = 20)
+```
+– Specifying the state to be “SC”, the group being the bottom, the number looked at being 7
+```{r}
+plot.county(state = "SC", 
+            data = final_combined_data$Combined_County_Data, 
+            interest = "bottom", 
+            x = 7)
+```
+– Once without specifying anything (defaults used)
+```{r}
+plot.county(data = final_combined_data$Combined_County_Data )
+```
+– Once specifying the state to be “PA”, the group being the top, the number looked at being 8
+```{r}
+plot.county(state = "PA", 
+            data = final_combined_data$Combined_County_Data, 
+            var_name = "enrollment", 
+            interest = "top", 
+            x = 8)
+```
+Now we will read in four more data sets and apply our functions:
+```{r}
+list_data_PST01a <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01b <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01c <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01d <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", 
+  default_var_name = "enrollment" )
+```
+
+Combined all 4 data sets:
+
+```{r}
+pre_final_combined_data_ab <- combine(list_data_PST01a,list_data_PST01b)
+pre_final_combined_data_cd <- combine(list_data_PST01c,list_data_PST01d)
+final_combined_data_PST <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
 ```
 
