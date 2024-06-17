@@ -10,6 +10,7 @@ format: html
 library(tidyverse)
 library(readr)
 library(readxl)
+library(scales)
 ```
 
 ## Data processing
@@ -341,9 +342,9 @@ list_data_b <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "enrollm
 ```{r}
 combine <- function(data1, data2){
   # combine county data
-  county_combined <- bind_rows(data1$County_Data, data2$County_Data)
+  county_combined <- bind_rows(data1$county_data, data2$county_data)
   # combine state data
-  state_combined <- bind_rows(data1$State_Data, data2$State_Data)
+  state_combined <- bind_rows(data1$state_data, data2$state_data)
   # return list of combined data
   return(list("county_data" = county_combined, 
               "state_data" = state_combined))
@@ -360,7 +361,6 @@ final_combined_data
 
 ### Plotting state data with enrollment mean and divison on y-axis and year on x-axis 
 ```{r}
-library(scales)
 #writing a function to plot based on state divisions 
 plot.state <- function(data, var_name = "enrollment"){
   
