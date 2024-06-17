@@ -304,8 +304,8 @@ step_4_5_6 <- function(data){
 ```{r}
 final_data_practice <- step_4_5_6(after_step_3)
 attributes(final_data_practice)
-head(final_data_practice$County_Data)
-head(final_data_practice$State_Data)
+head(final_data_practice$county_data)
+head(final_data_practice$state_data)
 
 ```
 
