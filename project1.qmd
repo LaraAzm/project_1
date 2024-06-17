@@ -489,4 +489,27 @@ plot.county(state = "PA",
             interest = "top", 
             x = 8)
 ```
+Now we will read in four more data sets and apply our functions:
+```{r}
+list_data_PST01a <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01b <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01c <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", 
+  default_var_name = "enrollment" )
+list_data_PST01d <- my_wrapper(
+  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", 
+  default_var_name = "enrollment" )
+```
+
+Combined all 4 data sets:
+
+```{r}
+pre_final_combined_data_ab <- combine(list_data_PST01a,list_data_PST01b)
+pre_final_combined_data_cd <- combine(list_data_PST01c,list_data_PST01d)
+final_combined_data_PST <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
+```
 
