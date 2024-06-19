@@ -1,7 +1,8 @@
 ---
-title: "Project 1: Data combination and summarization through functions"
-author: Laraib Azmat & Sam O'Ferrell
+title: "ST558 - Project 1: Data combination and summarization through functions"
+authors: Laraib Azmat & Sam O'Ferrell
 date: June 06, 2024
+description: This is a collaborative project to showcase generic function writing for the purpose of automating data processing and manipulation. In additiona, generic plotting functions help to automatically plot the returned data.
 format: html
 ---
 
@@ -35,10 +36,9 @@ edu_edit <- edu_data |>
 
 ### Step 3: Converting to a long form 
 ```{r}
-  #converting to a long form and moving the results to an "enrollment" column
+#converting to a long form and moving the results to an "enrollment" column
 edu_edit <- edu_edit |>
-  pivot_longer(cols = 3:12, 
-               values_to = "enrollment")
+  pivot_longer(cols = 3:12, values_to = "enrollment")
 #printing to see the results
 edu_edit
 ```
@@ -48,18 +48,20 @@ edu_edit
 #overwriting the object to save edits
 edu_edit <- edu_edit |>
   #changing the values to reflect years using the data information sheet
-  mutate( year = case_when(
-    name == "EDU010187D" ~ 1987, 
-    name == "EDU010188D" ~ 1988, 
-    name == "EDU010189D" ~ 1989, 
-    name == "EDU010190D" ~ 1990, 
-    name == "EDU010191D" ~ 1991, 
-    name == "EDU010192D" ~ 1992, 
-    name == "EDU010193D" ~ 1993, 
-    name == "EDU010194D" ~ 1994, 
-    name == "EDU010195D" ~ 1995, 
-    name == "EDU010196D" ~ 1996
-  )) |>
+  mutate(
+    year = case_when(
+      name == "EDU010187D" ~ 1987,
+      name == "EDU010188D" ~ 1988,
+      name == "EDU010189D" ~ 1989,
+      name == "EDU010190D" ~ 1990,
+      name == "EDU010191D" ~ 1991,
+      name == "EDU010192D" ~ 1992,
+      name == "EDU010193D" ~ 1993,
+      name == "EDU010194D" ~ 1994,
+      name == "EDU010195D" ~ 1995,
+      name == "EDU010196D" ~ 1996
+    )
+  ) |>
   #creating a new column to represent which measurement grabbed
   mutate(measurement = substr(edu_edit$name, 1, 7))
 
@@ -69,10 +71,10 @@ edu_edit
 
 ### Step 5: Creating a county data set with state variable 
 ```{r}
-#creating new data set with county level data 
+#creating new data set with county level data
 edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
 
-#overwriting the county object to save edits 
+#overwriting the county object to save edits
 edu_county <- edu_county |>
   #adding a new column to represent county's state
   mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
@@ -97,47 +99,96 @@ edu_state$area_name <- str_to_title(edu_state$area_name)
 #adding new column to reflect division of the state
 edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$area_name])
 
-#overwriting the state object to save edits 
+#overwriting the state object to save edits
 edu_state <- edu_state |>
-#fixing division data to reflect error condition and  
-    mutate(division = case_when(
+  #fixing division data to reflect error condition and
+  mutate(
+    division = case_when(
+      str_to_title(area_name) %in% c(
+        "Connecticut",
+        "Maine",
+        "Massachusetts",
+        "New Hampshire",
+        "Rhode Island",
+        "Vermont"
+      )
+      ~ "New England",
       
-     str_to_title(area_name) %in% c("Connecticut", "Maine", "Massachusetts", 
-                                    "New Hampshire", "Rhode Island", "Vermont") 
-     ~ "New England",
-     
-    str_to_title(area_name) %in% c("New Jersey", "New York", "Pennsylvania") 
-    ~ "Middle Atlantic",
-    
-    str_to_title(area_name) %in% c("Illinois", "Indiana", "Michigan", "Ohio", 
-                                   "Wisconsin") 
-    ~ "East North Central",
-    
-    str_to_title(area_name) %in% c("Iowa", "Kansas", "Minnesota", "Missouri", 
-                                   "Nebraska", "North Dakota", "South Dakota") 
-    ~ "West North Central",
-    
-    str_to_title(area_name) %in% c("Delaware", "Florida", "Georgia", "Maryland", 
-                                   "North Carolina", "South Carolina", "Virginia", 
-                                   "District of Columbia", "West Virginia")
-    ~ "South Atlantic",
-    
-    str_to_title(area_name) %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
-    ~ "East South Central",
-    
-    str_to_title(area_name) %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
-    ~ "West South Central",
-    
-    str_to_title(area_name) %in% c("Arizona", "Colorado", "Idaho", "Montana",
-                                   "Nevada", "New Mexico", "Utah", "Wyoming")
-    ~ "Mountain",
-    
-    str_to_title(area_name) %in% c("Alaska", "California", "Hawaii", 
-                                   "Oregon", "Washington") 
-    ~ "Pacific",
-    
-    is.na(division) ~ "ERROR"
-      )) |>
+      str_to_title(area_name) %in% c(
+        "New Jersey", 
+        "New York", 
+        "Pennsylvania")
+      ~ "Middle Atlantic",
+      
+      str_to_title(area_name) %in% c(
+        "Illinois", 
+        "Indiana", 
+        "Michigan", 
+        "Ohio", 
+        "Wisconsin")
+      ~ "East North Central",
+      
+      str_to_title(area_name) %in% c(
+        "Iowa",
+        "Kansas",
+        "Minnesota",
+        "Missouri",
+        "Nebraska",
+        "North Dakota",
+        "South Dakota"
+      )
+      ~ "West North Central",
+      
+      str_to_title(area_name) %in% c(
+        "Delaware",
+        "Florida",
+        "Georgia",
+        "Maryland",
+        "North Carolina",
+        "South Carolina",
+        "Virginia",
+        "District of Columbia",
+        "West Virginia"
+      )
+      ~ "South Atlantic",
+      
+      str_to_title(area_name) %in% c(
+        "Alabama", 
+        "Kentucky", 
+        "Mississippi", 
+        "Tennessee")
+      ~ "East South Central",
+      
+      str_to_title(area_name) %in% c(
+        "Arkansas", 
+        "Louisiana", 
+        "Oklahoma", 
+        "Texas")
+      ~ "West South Central",
+      
+      str_to_title(area_name) %in% c(
+        "Arizona",
+        "Colorado",
+        "Idaho",
+        "Montana",
+        "Nevada",
+        "New Mexico",
+        "Utah",
+        "Wyoming"
+      )
+      ~ "Mountain",
+      
+      str_to_title(area_name) %in% c(
+        "Alaska", 
+        "California", 
+        "Hawaii", 
+        "Oregon", 
+        "Washington")
+      ~ "Pacific",
+      
+      is.na(division) ~ "ERROR"
+    )
+  ) |>
   #adjusting columns to look better
   select(area_name, division, STCOU, everything())
 
@@ -145,7 +196,7 @@ edu_state <- edu_state |>
 edu_state
 ```
 
-## Repeating with generic functions 
+## Repeating with generic functions
 
 ### Reading in the second data set:
 ```{r}
@@ -155,21 +206,20 @@ edu_data_b <- read_csv("./data/EDU01b.csv")
 spec(edu_data_b)
 ```
 
-### Repeating step 1 & 2 with option to specify name of value column 
+### Repeating step 1 & 2 with option to specify name of value column
 ```{r}
-steps_1_and_2 <- function(data, value = "enrollment"){
-
-# selecting the appropriate columns
+steps_1_and_2 <- function(data, value = "enrollment") {
+  # selecting the appropriate columns
   selected_columns <- data |>
-       select(Area_name, STCOU, ends_with("D")) |>
-       rename("area_name" = "Area_name") 
+    select(Area_name, STCOU, ends_with("D")) |>
+    rename("area_name" = "Area_name")
   
-# pivoting the data, 'value' is defaulted to enrollment but can be changed
-  pivoted_data <- selected_columns |> 
-       pivot_longer(cols = 3:ncol(selected_columns), 
-               values_to = value)
+  # pivoting the data, 'value' is defaulted to enrollment but can be changed
+  pivoted_data <- selected_columns |>
+    pivot_longer(cols = 3:ncol(selected_columns),
+                 values_to = value)
   
-# returning the data 
+  # returning the data
   return(pivoted_data)
 }
 ```
@@ -183,18 +233,21 @@ after_step_2
 
 ### Writing function for step 3:
 ```{r}
-step_3 <- function(data){
-  
-edit <- data |>
-  #first we have to create a column corresponding to the last 2 digits
-   mutate(last_2_digits =  substr(name,8,9),
-  #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
-         year = as.numeric(ifelse(last_2_digits > 24, 
-                       paste("19",last_2_digits, sep = ""), 
-                       paste("20",last_2_digits, sep = ""))),
-         measurement = substr(data$name, 1, 7)) |>
-  select(-last_2_digits)
-return(edit)
+step_3 <- function(data) {
+  edit <- data |>
+    #first we have to create a column corresponding to the last 2 digits
+    mutate(
+      last_2_digits =  substr(name, 8, 9),
+      #then we will use logic to say if these are bigger than 24 the year must be in the 1900s
+      year = as.numeric(ifelse(
+        last_2_digits > 24,
+        paste("19", last_2_digits, sep = ""),
+        paste("20", last_2_digits, sep = "")
+      )),
+      measurement = substr(data$name, 1, 7)
+    ) |>
+    select(-last_2_digits)
+  return(edit)
 }
 ```
 
@@ -207,14 +260,13 @@ after_step_3
 ### Writing function for step 5:
 ```{r}
 #after already having the county data
-
-step_5 <- function(data){
+step_5 <- function(data) {
   with_state <- data |>
-  mutate(state = substr(area_name, nchar(area_name) - 1,nchar(area_name))) |>
-  #adjusting columns to look better
-  select(area_name, state, STCOU, everything())  
+    mutate(state = substr(area_name, nchar(area_name) - 1, nchar(area_name))) |>
+    #adjusting columns to look better
+    select(area_name, state, STCOU, everything())
   class(with_state) <- c("county", class(with_state))
-
+  
   return(with_state)
 }
 ```
@@ -222,7 +274,8 @@ step_5 <- function(data){
 ### Testing step 5:
 ```{r}
 #subsetting to work after step 4
-county_practice <- subset(after_step_3, grepl(pattern = ", \\w\\w", after_step_3$area_name))
+county_practice <- subset(after_step_3,
+                          grepl(pattern = ", \\w\\w", after_step_3$area_name))
 
 practice <- step_5(county_practice)
 practice #works 
@@ -230,50 +283,102 @@ practice #works
 
 ### Step 6 function (division):
 ```{r}
-step_6_division <- function(data){
+step_6_division <- function(data) {
   title_case_data <- data |>
     # first we mutate to str_to_title and render that:
     mutate(area_name = str_to_title(area_name))
-
-# fixing division data to reflect error condition 
+  
+  # fixing division data to reflect error condition
   division_data <- title_case_data |>
-    mutate(division = case_when(
-      
-     area_name %in% c("Connecticut", "Maine", "Massachusetts", 
-                      "New Hampshire", "Rhode Island", "Vermont") 
-     ~ "New England",
-     
-    area_name %in% c("New Jersey", "New York", "Pennsylvania") 
-    ~ "Middle Atlantic",
-    
-    area_name %in% c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin") 
-    ~ "East North Central",
-    
-    area_name %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", 
-                     "North Dakota", "South Dakota") 
-    ~ "West North Central",
-    
-    area_name %in% c("Delaware", "Florida", "Georgia", "Maryland", 
-                     "North Carolina", "South Carolina", "Virginia", 
-                     "District of Columbia", "West Virginia")
-    ~ "South Atlantic",
-    
-    area_name %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") 
-    ~ "East South Central",
-    
-    area_name %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") 
-    ~ "West South Central",
-    
-    area_name %in% c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", 
-                     "New Mexico", "Utah", "Wyoming")
-    ~ "Mountain",
-    
-    area_name %in% c("Alaska", "California", "Hawaii", "Oregon", "Washington") 
-    ~ "Pacific",
-    
-  TRUE ~ "ERROR")) |>
-  #adjusting columns to look better
-  select(area_name, division, STCOU, everything())
+    mutate(
+      division = case_when(
+        area_name %in% c(
+          "Connecticut",
+          "Maine",
+          "Massachusetts",
+          "New Hampshire",
+          "Rhode Island",
+          "Vermont"
+        )
+        ~ "New England",
+        
+        area_name %in% c(
+          "New Jersey", 
+          "New York", 
+          "Pennsylvania")
+        ~ "Middle Atlantic",
+        
+        area_name %in% c(
+          "Illinois", 
+          "Indiana", 
+          "Michigan", 
+          "Ohio", 
+          "Wisconsin")
+        ~ "East North Central",
+        
+        area_name %in% c(
+          "Iowa",
+          "Kansas",
+          "Minnesota",
+          "Missouri",
+          "Nebraska",
+          "North Dakota",
+          "South Dakota"
+        )
+        ~ "West North Central",
+        
+        area_name %in% c(
+          "Delaware",
+          "Florida",
+          "Georgia",
+          "Maryland",
+          "North Carolina",
+          "South Carolina",
+          "Virginia",
+          "District of Columbia",
+          "West Virginia"
+        )
+        ~ "South Atlantic",
+        
+        area_name %in% c(
+          "Alabama", 
+          "Kentucky", 
+          "Mississippi", 
+          "Tennessee")
+        ~ "East South Central",
+        
+        area_name %in% c(
+          "Arkansas", 
+          "Louisiana", 
+          "Oklahoma", 
+          "Texas")
+        ~ "West South Central",
+        
+        area_name %in% c(
+          "Arizona",
+          "Colorado",
+          "Idaho",
+          "Montana",
+          "Nevada",
+          "New Mexico",
+          "Utah",
+          "Wyoming"
+        )
+        ~ "Mountain",
+        
+        area_name %in% c(
+          "Alaska", 
+          "California", 
+          "Hawaii", 
+          "Oregon", 
+          "Washington")
+        ~ "Pacific",
+        
+        TRUE ~ "ERROR"
+      )
+    ) |>
+    #adjusting columns to look better
+    select(area_name, division, STCOU, everything())
   return(division_data)
 }
 ```
@@ -287,9 +392,8 @@ practice_step_6
 
 ### Step 4 function: 
 ```{r}
-
-step_4_5_6 <- function(data){
-  #first we need to take the data and split it into 
+step_4_5_6 <- function(data) {
+  #first we need to take the data and split it into
   #two different data sets (county and state)
   county <- subset(data, grepl(pattern = ", \\w\\w", data$area_name))
   state <- subset(data, !(grepl(pattern = ", \\w\\w", data$area_name)))
@@ -307,56 +411,52 @@ final_data_practice <- step_4_5_6(after_step_3)
 attributes(final_data_practice)
 head(final_data_practice$county_data)
 head(final_data_practice$state_data)
-
 ```
 
 ### Writing wrapper function
 ```{r}
-my_wrapper <- function(url, default_var_name = "enrollment"){
-# first we read in the csv
+my_wrapper <- function(url, default_var_name = "enrollment") {
+  # first we read in the csv
   result <- read_csv(url) |>
-# then we apply steps 1 and 2
-    steps_1_and_2(value = default_var_name)|>
-# now we apply step 3
+    # then we apply steps 1 and 2
+    steps_1_and_2(value = default_var_name) |>
+    # now we apply step 3
     step_3() |>
-# finally steps 4,5,6 which returns a list of state and county data
+    # finally steps 4,5,6 which returns a list of state and county data
     step_4_5_6()
-return(result)
+  return(result)
 }
 ```
 
 ### Testing wrapper function
 ```{r}
 # to use this function you provide a url and the default variable name
-data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing" )
+data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing")
 data_b_test
 ```
 
 ### Applying the function to both data sets, resulting in two lists
 ```{r}
-list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",
-                          default_var_name = "enrollment" )
+list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", default_var_name = "enrollment")
 
-list_data_b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv",
-                          default_var_name = "enrollment" )
+list_data_b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", default_var_name = "enrollment")
 ```
 
 ### Creating a function that combines the data sets
 ```{r}
-combine <- function(data1, data2){
+combine <- function(data1, data2) {
   # combine county data
   county_combined <- bind_rows(data1$county_data, data2$county_data)
   # combine state data
   state_combined <- bind_rows(data1$state_data, data2$state_data)
   # return list of combined data
-  return(list("county_data" = county_combined, 
-              "state_data" = state_combined))
+  return(list("county_data" = county_combined, "state_data" = state_combined))
 }
 ```
 
 applying function to both lists of data sets
 ```{r}
-final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data <- combine(list_data_a, list_data_b)
 final_combined_data
 ```
 
@@ -364,42 +464,41 @@ final_combined_data
 
 ### Plotting state data with enrollment mean and divison on y-axis and year on x-axis 
 ```{r}
-#writing a function to plot based on state divisions 
-plot.state <- function(data, var_name = "enrollment"){
-  
-  #creating a temporary object to store edits 
+#writing a function to plot based on state divisions
+plot.state <- function(data, var_name = "enrollment") {
+  #creating a temporary object to store edits
   data_summary <- data |>
     mutate(year = as.numeric(year)) |>
     
     #filtering out error values in division
     filter(division != "ERROR", !is.na(var_name)) |>
     
-    #grouing by division and year 
+    #grouing by division and year
     group_by(division, year) |>
     
     #summarizing the enrollment means
-    summarise(enroll_mean = mean(get(var_name))) 
+    summarise(enroll_mean = mean(get(var_name)))
   
   #plotting the data as a line graph
-  data_summary |> 
+  data_summary |>
     
-    ggplot(data_summary |> aes(x = year, 
-                               y = enroll_mean, 
-                               colour = division)) + 
-    #setting the plot as line with additional aesthetic to make the lines look different 
-    geom_line(aes(linetype = division), lwd = .75) + 
+    ggplot(data_summary |> aes(x = year, y = enroll_mean, colour = division)) +
+    #setting the plot as line with additional aesthetic to make the lines look different
+    geom_line(aes(linetype = division), lwd = .75) +
     #hiding the linetype legend
     guides(linetype = "none") +
     #changing the labels of x and y axis and the title
-    labs(x = "Year", 
-         y = "Enrollment mean", 
-         title = "Enrollment changes over the years", 
-         colour = "Division") +
+    labs(
+      x = "Year",
+      y = "Enrollment mean",
+      title = "Enrollment changes over the years",
+      colour = "Division"
+    ) +
     #added to prevent scientific notion in the axis lables
     scale_y_continuous(labels = label_comma())
 }
 
-#testing the function 
+#testing the function
 plot.state(data = edu_state, var_name = "enrollment")
 ```
 
@@ -412,40 +511,47 @@ plot.state(final_combined_data$state_data, var_name = "enrollment")
   -   data from the state specified or the default
   -   only the Area_names from the previous part
 ```{r}
-plot.county <- function(data, state_name = "AL", interest = "top", 
-                        x = "5", var_name = "enrollment"){
- # first create data set that has areas we are interested in
-  if (interest == "top"){
-  summary <- data |>
-  filter(state == state_name) |>
-  group_by(area_name) |>
-  summarise(enroll_mean = mean(get(var_name))) |>
-  arrange(desc(enroll_mean)) |>
-  slice(1:x) |>
-  select(area_name)
+plot.county <- function(data,
+                        state_name = "AL",
+                        interest = "top",
+                        x = "5",
+                        var_name = "enrollment") {
+  # first create data set that has areas we are interested in
+  if (interest == "top") {
+    summary <- data |>
+      filter(state == state_name) |>
+      group_by(area_name) |>
+      summarise(enroll_mean = mean(get(var_name))) |>
+      arrange(desc(enroll_mean)) |>
+      slice(1:x) |>
+      select(area_name)
   }
-  else if(interest == "bottom"){
-  summary <- data |>
-  filter(state == state_name) |>
-  group_by(area_name) |>
-  summarise(enroll_mean = mean(get(var_name))) |>
-  arrange(enroll_mean) |>
-  slice(1:x) |>
-  select(area_name)
+  else if (interest == "bottom") {
+    summary <- data |>
+      filter(state == state_name) |>
+      group_by(area_name) |>
+      summarise(enroll_mean = mean(get(var_name))) |>
+      arrange(enroll_mean) |>
+      slice(1:x) |>
+      select(area_name)
   }
-# now combine this with original data set to plot values:
+  # now combine this with original data set to plot values:
   new <- semi_join(data, summary, by = "area_name")
-  ggplot(new |> mutate(year = as.numeric(year)), 
-         aes(x = year, 
-             y = get(var_name), 
-             colour = area_name)) + 
-    theme(legend.position="bottom") +
-    geom_line(aes(linetype = area_name), lwd = .65) + 
+  ggplot(new |> mutate(year = as.numeric(year)),
+         aes(
+           x = year,
+           y = get(var_name),
+           colour = area_name
+         )) +
+    theme(legend.position = "bottom") +
+    geom_line(aes(linetype = area_name), lwd = .65) +
     guides(linetype = "none") +
-    labs(x = "Year", 
-         y = "Enrollment", 
-         title = "Enrollment changes over the years", 
-         colour = "County") +
+    labs(
+      x = "Year",
+      y = "Enrollment",
+      title = "Enrollment changes over the years",
+      colour = "County"
+    ) +
     #added to prevent scientific notion in the axis lables
     scale_y_continuous(labels = label_comma())
   
@@ -454,113 +560,114 @@ plot.county <- function(data, state_name = "AL", interest = "top",
 
 ### Testing the county plot function
 ```{r}
-plot.county(state = "NC", 
-            data = final_combined_data$county_data, 
-            var_name = "enrollment", 
-            interest = "top", 
-            x = 15)
+plot.county(
+  state = "NC",
+  data = final_combined_data$county_data,
+  var_name = "enrollment",
+  interest = "top",
+  x = 15
+)
 ```
 
 ## Final Report 
 
 ### Run our data processing function on two enrollment URLs:
 ```{r}
-list_data_a <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
-  default_var_name = "enrollment" )
-list_data_b <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
-  default_var_name = "enrollment" )
+list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", default_var_name = "enrollment")
+list_data_b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", default_var_name = "enrollment")
 ```
 
 ### Run our data combining function to put these into one object (with two data frames):
 ```{r}
-final_combined_data <- combine(list_data_a,list_data_b)
+final_combined_data <- combine(list_data_a, list_data_b)
 final_combined_data
 ```
 
 ### Use the plot function on the state data frame:
 ```{r}
-plot.state(data = final_combined_data$state_data, 
-           var_name = "enrollment")
+plot.state(data = final_combined_data$state_data, var_name = "enrollment")
 ```
 
 
 ### Use the plot function on the county data frame:
   -   Specifying the state to be “NC”, the group being the top, the number looked at being 20
 ```{r}
-plot.county(state = "NC", 
-            data = final_combined_data$county_data, 
-            interest = "top", 
-            x = 20)
+plot.county(
+  state = "NC",
+  data = final_combined_data$county_data,
+  interest = "top",
+  x = 20
+)
 ```
+
 – Specifying the state to be “SC”, the group being the bottom, the number looked at being 7
 ```{r}
-plot.county(state = "SC", 
-            data = final_combined_data$county_data, 
-            interest = "bottom", 
-            x = 7)
+plot.county(
+  state = "SC",
+  data = final_combined_data$county_data,
+  interest = "bottom",
+  x = 7
+)
 ```
+
 – Once without specifying anything (defaults used)
 ```{r}
 plot.county(data = final_combined_data$county_data )
 ```
+
 – Once specifying the state to be “PA”, the group being the top, the number looked at being 8
 ```{r}
-plot.county(state = "PA", 
-            data = final_combined_data$county_data, 
-            var_name = "enrollment", 
-            interest = "top", 
-            x = 8)
+plot.county(
+  state = "PA",
+  data = final_combined_data$county_data,
+  var_name = "enrollment",
+  interest = "top",
+  x = 8
+)
 ```
 
 ### Reading similar data sets and applying our functions:
 ```{r}
-list_data_pst01a <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
-  default_var_name = "enrollment" )
+list_data_pst01a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", default_var_name = "enrollment")
 
-list_data_pst01b <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", 
-  default_var_name = "enrollment" )
+list_data_pst01b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", default_var_name = "enrollment")
 
-list_data_pst01c <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", 
-  default_var_name = "enrollment" )
+list_data_pst01c <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", default_var_name = "enrollment")
 
-list_data_pst01d <- my_wrapper(
-  url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", 
-  default_var_name = "enrollment" )
+list_data_pst01d <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", default_var_name = "enrollment")
 ```
 
 ### Combine all 4 data sets:
 ```{r}
-pre_final_combined_data_ab <- combine(list_data_pst01a,list_data_pst01b)
-pre_final_combined_data_cd <- combine(list_data_pst01c,list_data_pst01d)
-final_combined_data_pst <- combine(pre_final_combined_data_ab,pre_final_combined_data_cd)
+pre_final_combined_data_ab <- combine(list_data_pst01a, list_data_pst01b)
+pre_final_combined_data_cd <- combine(list_data_pst01c, list_data_pst01d)
+final_combined_data_pst <- combine(pre_final_combined_data_ab, pre_final_combined_data_cd)
 ```
 
 ### Use the plot function on the state data frame:
 ```{r}
-plot.state(data = final_combined_data_pst$state_data, 
-           var_name = "enrollment")
+plot.state(data = final_combined_data_pst$state_data, var_name = "enrollment")
 ```
 
 ### Use the plot function on the county data frame:
   -   Specifying the state to be “CA”, the group being the top, the number looked at being 15
 ```{r}
-plot.county(state = "CA", 
-            data = final_combined_data_pst$county_data, 
-            interest = "top", 
-            x = 15)
+plot.county(
+  state = "CA",
+  data = final_combined_data_pst$county_data,
+  interest = "top",
+  x = 15
+)
 ```
 
 - Once specifying the state to be “TX”, the group being the top, the number looked at being 4
 ```{r}
-plot.county(state = "TX", 
-            data = final_combined_data_pst$county_data, 
-            interest = "top", 
-            x = 4)
+plot.county(
+  state = "TX",
+  data = final_combined_data_pst$county_data,
+  interest = "top",
+  x = 4
+)
 ```
 
 – Once without specifying anything (defaults used)
@@ -570,10 +677,12 @@ plot.county(data = final_combined_data_pst$county_data)
 
 – Once specifying the state to be “NY”, the group being the top, the number looked at being 10
 ```{r}
-plot.county(state = "NY", 
-            data = final_combined_data_pst$county_data, 
-            interest = "top", 
-            x = 10)
+plot.county(
+  state = "NY",
+  data = final_combined_data_pst$county_data,
+  interest = "top",
+  x = 10
+)
 ```
 
 
