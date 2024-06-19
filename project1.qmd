@@ -101,14 +101,13 @@ For the rest of the data set, we will create a state data set and specify the di
 #creating new data set with state level data
 edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$area_name)))
 
-#adjusting area_name values to easily identify the region
-edu_state$area_name <- str_to_title(edu_state$area_name)
-
 #adding new column to reflect division of the state
 edu_state$division <- as.character(setNames(state.division, state.name)[edu_state$area_name])
 
 #overwriting the state object to save edits
 edu_state <- edu_state |>
+  #removing duplicate district of columbia rows by remove the all caps version
+  filter(area_name != "DISTRICT OF COLUMBIA") |>
   #fixing division data to reflect error condition and
   mutate(
     division = case_when(
@@ -293,7 +292,9 @@ practice #works
 ```{r}
 step_6_division <- function(data) {
   title_case_data <- data |>
-    # first we mutate to str_to_title and render that:
+    # removing duplicate district of columbia rows by remove the all caps version
+    filter(area_name != "DISTRICT OF COLUMBIA") |>
+    # mutate to str_to_title and render that:
     mutate(area_name = str_to_title(area_name))
   
   # fixing division data to reflect error condition
