@@ -2,7 +2,7 @@
 title: "ST558 - Project 1: Data combination and summarization through functions"
 authors: Laraib Azmat & Sam O'Ferrell
 date: June 06, 2024
-description: This is a collaborative project to showcase generic function writing for the purpose of automating data processing and manipulation. In additiona, generic plotting functions help to automatically plot the returned data.
+description: This is a collaborative project to showcase generic function writing for the purpose of automating data processing and manipulation. In addition, generic plotting functions help to automatically plot the returned data.
 format: html
 ---
 
@@ -16,10 +16,12 @@ library(scales)
 
 ## Data processing
 
+First we will start our data manipulation and cleaning, without the use of creating functions. 
+
 ### Step 1: Read in the data
 ```{r}
 #reading in data from data folder
-edu_data <- read_csv("./data/EDU01a.csv")
+edu_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 
 #reading specs of table to get column names
 spec(edu_data)
@@ -44,6 +46,9 @@ edu_edit
 ```
 
 ### Step 4: Converting year to numeric data and adding a column to represent measurement 
+
+Because there are only 10 unique values of name, we can specify the year for each one within mutate.
+
 ```{r}
 #overwriting the object to save edits
 edu_edit <- edu_edit |>
@@ -70,6 +75,8 @@ edu_edit
 ```
 
 ### Step 5: Creating a county data set with state variable 
+Here we will subset the data set to only include rows where the area name is in the form of a county. 
+After subsetting, we will substring the area name variable to extract the state variable.
 ```{r}
 #creating new data set with county level data
 edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
@@ -77,7 +84,7 @@ edu_county <- subset(edu_edit, grepl(pattern = ", \\w\\w", edu_edit$area_name))
 #overwriting the county object to save edits
 edu_county <- edu_county |>
   #adding a new column to represent county's state
-  mutate(state = str_extract(edu_county$area_name, " \\w\\w")) |>
+  mutate(state = substr(area_name, nchar(area_name) - 1, nchar(area_name))) |>
   #adjusting columns to look better
   select(area_name, state, STCOU, name, measurement, year, everything())
 
@@ -89,6 +96,7 @@ edu_county
 ```
 
 ### Step 6: Creating a state data set with division variable 
+For the rest of the data set, we will create a state data set and specify the division of each state . 
 ```{r}
 #creating new data set with state level data
 edu_state <- subset(edu_edit, !(grepl(pattern = ", \\w\\w", edu_edit$area_name)))
@@ -197,10 +205,10 @@ edu_state
 ```
 
 ## Repeating with generic functions
-
+Now we will create functions to automate the processes that were just written.
 ### Reading in the second data set:
 ```{r}
-edu_data_b <- read_csv("./data/EDU01b.csv")
+edu_data_b <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 
 #reading specs of table to get column names
 spec(edu_data_b)
@@ -391,6 +399,7 @@ practice_step_6
 ```
 
 ### Step 4 function: 
+We will now create a function that first separates the data into state and county data, and then apply the specific step 5 and step 6 function respectively to each data set.
 ```{r}
 step_4_5_6 <- function(data) {
   #first we need to take the data and split it into
@@ -414,6 +423,7 @@ head(final_data_practice$state_data)
 ```
 
 ### Writing wrapper function
+Now, instead of applying each function individually, we can create a wrapper function that will complete all of these steps in one function.
 ```{r}
 my_wrapper <- function(url, default_var_name = "enrollment") {
   # first we read in the csv
@@ -435,7 +445,7 @@ data_b_test <- my_wrapper(url = "./data/EDU01b.csv", default_var_name = "testing
 data_b_test
 ```
 
-### Applying the function to both data sets, resulting in two lists
+### Applying the wrapper function to both data sets, resulting in two lists
 ```{r}
 list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", default_var_name = "enrollment")
 
@@ -443,6 +453,7 @@ list_data_b <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU
 ```
 
 ### Creating a function that combines the data sets
+Now, we will create a function that returns a list of two data sets, one with the county data and one with the state data of the combined two data sets.
 ```{r}
 combine <- function(data1, data2) {
   # combine county data
@@ -454,7 +465,7 @@ combine <- function(data1, data2) {
 }
 ```
 
-applying function to both lists of data sets
+### Applying function to both lists of data sets
 ```{r}
 final_combined_data <- combine(list_data_a, list_data_b)
 final_combined_data
@@ -508,8 +519,8 @@ plot.state(final_combined_data$state_data, var_name = "enrollment")
 ```
 
 ### County plot function with:
-  -   data from the state specified or the default
-  -   only the Area_names from the previous part
+
+We will create a plot function that looks at either the top/bottom x number of states, returning only the area names. After having the data set of area names, we can use a semi-join with the previously combined county data to only keep the data in the combined data that matches the area names data set. We will have default values of our state being AL, looking at the top 5 values for the enrollment variable. 
 ```{r}
 plot.county <- function(data,
                         state_name = "AL",
@@ -571,6 +582,8 @@ plot.county(
 
 ## Final Report 
 
+We will now create a final report, using all the functions written before on a total of 6 data sets. First, starting with the EDU data sets used before:
+
 ### Run our data processing function on two enrollment URLs:
 ```{r}
 list_data_a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", default_var_name = "enrollment")
@@ -626,7 +639,9 @@ plot.county(
 )
 ```
 
+
 ### Reading similar data sets and applying our functions:
+Now, we will apply our data processing function to 4 data sets and proceed to combine them into one big list.
 ```{r}
 list_data_pst01a <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", default_var_name = "enrollment")
 
@@ -685,4 +700,6 @@ plot.county(
 )
 ```
 
+As we can see, after writing functions, it is much easier to apply them to data sets as opposed to having to code all the processing, combining, and plotting for each one.
 
+ 
